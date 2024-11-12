@@ -1,18 +1,22 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:test1/list_loader/BuildGudang.dart';
 import 'package:test1/list_loader/BuildHutang.dart';
 import 'package:test1/list_loader/BuildPiutang.dart';
 import 'package:test1/list_loader/BuildTransaksi.dart';
+import 'package:test1/list_loader/SettingsPage.dart';
+import 'package:test1/popups/ExitPopup.dart';
 
 class NotesPage extends StatefulWidget {
   @override
   _NotesPageState createState() => _NotesPageState();
 }
 
-class _NotesPageState extends State<NotesPage> with SingleTickerProviderStateMixin {
+class _NotesPageState extends State<NotesPage>
+    with SingleTickerProviderStateMixin {
   TabController? _tabController;
+  final FocusNode _focusNode = FocusNode();
 
-  // Track active icons based on the tab index
   int _selectedIndex = 0;
 
   @override
@@ -21,6 +25,12 @@ class _NotesPageState extends State<NotesPage> with SingleTickerProviderStateMix
     // Initialize TabController for managing tabs
     _tabController = TabController(length: 4, vsync: this);
     _tabController?.addListener(_onTabChanged);
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _focusNode.requestFocus(); // Request focus to enable key listener
   }
 
   // Update the selected index based on tab change
@@ -33,6 +43,7 @@ class _NotesPageState extends State<NotesPage> with SingleTickerProviderStateMix
   @override
   void dispose() {
     _tabController?.dispose();
+    _focusNode.dispose();
     super.dispose();
   }
 
@@ -44,23 +55,36 @@ class _NotesPageState extends State<NotesPage> with SingleTickerProviderStateMix
         title: Text('Agus Plastik',
             style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
         backgroundColor: Color(0xFF212529),
+        iconTheme: IconThemeData(color: Colors.white),
         actions: [
           IconButton(
             icon: Icon(Icons.settings),
             color: Colors.grey,
-            onPressed: (){
+            onPressed: () {
+              Navigator.push(context,
+                  MaterialPageRoute(builder: (context) => Settingspage()));
             },
           ),
           SizedBox(width: 8),
-          IconButton(
-            icon: Icon(Icons.exit_to_app),
-            color: Colors.grey,
-            onPressed: (){
+          RawKeyboardListener(
+            focusNode: _focusNode,
+            onKey: (RawKeyEvent event) {
+              if (event is RawKeyDownEvent &&
+                  event.logicalKey == LogicalKeyboardKey.escape) {
+                Exitpopup.showExitPopup(
+                    context); // Trigger popup on Escape key press
+              }
             },
+            child: IconButton(
+              icon: Icon(Icons.exit_to_app),
+              color: Colors.grey,
+              onPressed: () {
+                Exitpopup.showExitPopup(context);
+              },
+            ),
           ),
           SizedBox(width: 8),
         ],
-        
       ),
       body: TabBarView(
         controller: _tabController,
@@ -81,7 +105,7 @@ class _NotesPageState extends State<NotesPage> with SingleTickerProviderStateMix
           setState(() {
             _selectedIndex = index;
           });
-          _tabController?.animateTo(index); // Change the tab when a bottom button is clicked
+          _tabController?.animateTo(index);
         },
         items: [
           BottomNavigationBarItem(
@@ -89,7 +113,7 @@ class _NotesPageState extends State<NotesPage> with SingleTickerProviderStateMix
                 color: _selectedIndex == 0 ? Colors.yellow : Colors.grey[500]),
             label: 'Gudang',
           ),
-          BottomNavigationBarItem (
+          BottomNavigationBarItem(
             icon: Icon(Icons.shopping_cart,
                 color: _selectedIndex == 1 ? Colors.yellow : Colors.grey[500]),
             label: 'Transaksi',

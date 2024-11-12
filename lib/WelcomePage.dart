@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 class WelcomePage extends StatefulWidget {
   @override
@@ -7,6 +8,7 @@ class WelcomePage extends StatefulWidget {
 
 class _WelcomePageState extends State<WelcomePage> {
   final TextEditingController _ipController = TextEditingController();
+  final FocusNode _focusNode = FocusNode();
   bool _isLoading = false;
   String _message = '';
 
@@ -20,90 +22,120 @@ class _WelcomePageState extends State<WelcomePage> {
     // Simulate a network call delay
     await Future.delayed(Duration(seconds: 2));
 
-    // Here you can replace this with actual logic to verify the IP address
-    bool isValid = _ipController.text == '192.168.1.100';  // Example check, replace with actual check
+    // Example check for IP validation (replace with actual logic)
+    bool isValid = _ipController.text == '192.168.1.100';
 
     setState(() {
       _isLoading = false;
       if (isValid) {
-        _message = 'Connection successful! Proceeding to Home page...';
+        _message = 'Koneksi berhasil! Mengarahkan ke menu utama...';
       } else {
-        _message = 'Invalid IP address, please try again.';
+        _message = 'IP Lokal tidak terdeteksi, harap mencoba lagi.';
       }
     });
 
     if (isValid) {
-        setState(() {
-          _message = 'Koneksi berhasil! Mengarahkan ke menu utama...';
-        });
-        // Navigate to Home page after a delay
-        Future.delayed(Duration(seconds: 2), () {
-          Navigator.pushReplacementNamed(context, '/home');
-        });
-      } else {
-        setState(() {
-          _message = 'IP Lokal tidak terdeteksi, harap mencoba lagi.';
+      // Navigate to Home page after a delay
+      Future.delayed(Duration(seconds: 2), () {
+        Navigator.pushReplacementNamed(context, '/home');
       });
     }
+  }
 
+  @override
+  void initState() {
+    super.initState();
+    _focusNode.requestFocus(); // Request focus to enable key listener
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Color(0xFF212529),  // Base background color
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              Text(
-                'Enter Local IP Address',
-                style: TextStyle(
-                  fontSize: 24,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.yellow, // Yellow title color
+      backgroundColor: Color(0xFF212529),
+      body: RawKeyboardListener(
+        focusNode: _focusNode,
+        onKey: (RawKeyEvent event) {
+          if (event is RawKeyDownEvent &&
+              (event.logicalKey == LogicalKeyboardKey.enter ||
+               event.logicalKey == LogicalKeyboardKey.numpadEnter)) {
+            _verifyIP(); // Trigger verification on "Enter" key press
+          }
+        },
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                Text(
+                  'Selamat Datang di Agus Plastik',
+                  style: TextStyle(
+                    fontSize: 30,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.yellow,
+                  ),
                 ),
-              ),
-              SizedBox(height: 20),
-              TextField(
-                controller: _ipController,
-                decoration: InputDecoration(
-                  labelText: 'IP Address',
-                  labelStyle: TextStyle(color: Colors.yellow), // Yellow label
-                  border: OutlineInputBorder(borderSide: BorderSide(color: Colors.yellow),),
-                  focusedBorder: OutlineInputBorder(borderSide: BorderSide(color: Colors.yellow, width: 2.0),),                  
-                  fillColor: Color(0xFF212529),
-                  filled: true,
+                Text(
+                  'Masukkan IP Server Lokal',
+                  style: TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.yellow,
+                  ),
                 ),
-                style: TextStyle(color: Colors.yellow),
-              ),
-              SizedBox(height: 20),
-              ElevatedButton(
-                onPressed: _verifyIP,
-                child: Text('Verify', style: TextStyle(color: Color(0xFF212529)),),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.yellow, // Yellow button color
-                ),
-              ),
-              SizedBox(height: 20),
-              _isLoading
-                  ? CircularProgressIndicator(
-                      valueColor: AlwaysStoppedAnimation<Color>(Colors.yellow),
-                    )
-                  : Text(
-                      _message,
-                      style: TextStyle(
-                        fontSize: 18,
-                        color: Colors.white,
-                      ),
+                SizedBox(height: 20),
+                TextField(
+                  controller: _ipController,
+                  decoration: InputDecoration(
+                    labelText: 'IP Address',
+                    labelStyle: TextStyle(color: Colors.yellow),
+                    border: OutlineInputBorder(
+                      borderSide: BorderSide(color: Colors.white),
                     ),
-            ],
+                    focusedBorder: OutlineInputBorder(
+                      borderSide: BorderSide(color: Colors.yellow, width: 2.0),
+                    ),
+                    fillColor: Color(0xFF212529),
+                    filled: true,
+                  ),
+                  style: TextStyle(color: Colors.yellow),
+                ),
+                SizedBox(height: 20),
+                ElevatedButton(
+                  onPressed: _verifyIP,
+                  child: Text(
+                    'Verify',
+                    style: TextStyle(color: Color(0xFF212529)),
+                  ),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.yellow,
+                  ),
+                ),
+                SizedBox(height: 20),
+                _isLoading
+                    ? CircularProgressIndicator(
+                        valueColor: AlwaysStoppedAnimation<Color>(Colors.yellow),
+                      )
+                    : Text(
+                        _message,
+                        style: TextStyle(
+                          fontSize: 18,
+                          color: Colors.yellow,
+                        ),
+                      ),
+              ],
+            ),
           ),
         ),
       ),
     );
+  }
+
+  @override
+  void dispose() {
+    _focusNode.dispose(); // Dispose focus node to avoid memory leaks
+    _ipController.dispose(); // Dispose controller when not needed
+    super.dispose();
   }
 }
