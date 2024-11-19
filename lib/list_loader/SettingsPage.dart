@@ -47,7 +47,7 @@ class _SettingspageState extends State<Settingspage> {
               // Navigate to NotesPage when Escape is pressed
               Navigator.pushAndRemoveUntil(
   context,
-  MaterialPageRoute(builder: (context) => NotesPage()),
+  MaterialPageRoute(builder: (context) => Homepage()),
   (Route<dynamic> route) => false, // Removes all routes until the NotesPage
 );
 

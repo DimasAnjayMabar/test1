@@ -7,12 +7,12 @@ import 'package:test1/list_loader/BuildTransaksi.dart';
 import 'package:test1/list_loader/SettingsPage.dart';
 import 'package:test1/popups/ExitPopup.dart';
 
-class NotesPage extends StatefulWidget {
+class Homepage extends StatefulWidget {
   @override
-  _NotesPageState createState() => _NotesPageState();
+  HomepageState createState() => HomepageState();
 }
 
-class _NotesPageState extends State<NotesPage>
+class HomepageState extends State<Homepage>
     with SingleTickerProviderStateMixin {
   TabController? _tabController;
   final FocusNode _focusNode = FocusNode();
