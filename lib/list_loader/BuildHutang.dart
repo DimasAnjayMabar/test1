@@ -1,23 +1,81 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:test1/beans/user.dart';  // Assuming User is a model class storing credentials
+import 'package:http/http.dart' as http;
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+
 
 class Buildhutang extends StatelessWidget {
   const Buildhutang({super.key});
+
+  // Fetch products from the backend API using IP from the user object
+  Future<List<dynamic>> fetchProducts() async {
+    // Retrieve user credentials (you can fetch this from storage or any global state)
+    User? user = await User.getUserCredentials(); // Assuming this method fetches the saved user data
+
+    if (user == null) {
+      throw Exception('No user data found');
+    }
+
+    final serverIp = user.serverIp; // Get server IP from the saved user object
+
+    // Make an HTTP POST request to fetch products using the server IP
+    final response = await http.post(
+      Uri.parse('http://$serverIp:3000/debts'), // Change to POST request
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: json.encode({
+        'servername': serverIp,
+        'username': user.username, // Use saved username
+        'password': user.password, // Use saved password
+        'database': user.database, // Use saved database name
+      }),
+    );
+
+    if (response.statusCode == 200) {
+      // Parsing JSON hanya jika berhasil
+      return json.decode(response.body)['products'];
+    } else {
+      // Print status code and body for debugging
+      print('Failed to load products: ${response.statusCode}');
+      print('Response body: ${response.body}');
+      throw Exception('Failed to load products');
+    }
+  }
+
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.grey[850],
-      body: SingleChildScrollView(
-        padding: EdgeInsets.all(16),
-        physics: BouncingScrollPhysics(), // Enable bounce effect
-        child: Column(
-          children: List.generate(
-            20, // Number of items in the list
-            (index) {
-              return ProductCard(name: 'Debt ${index + 1}', price: '\$${(index + 1) * 10.00}');
-            },
-          ),
-        ),
+      body: FutureBuilder<List<dynamic>>(
+        future: fetchProducts(),
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return Center(child: CircularProgressIndicator());
+          } else if (snapshot.hasError) {
+            return Center(child: Text('Error: ${snapshot.error}'));
+          } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
+            return Center(child: Text('No products available'));
+          }
+
+          // If products are successfully fetched, display them
+          final products = snapshot.data!;
+
+          return SingleChildScrollView(
+            padding: EdgeInsets.all(16),
+            physics: BouncingScrollPhysics(),
+            child: Column(
+              children: products.map((product) {
+                return ProductCard(
+                  name: product['nama_barang'],
+                  price: product['harga_jual'].toString(),
+                );
+              }).toList(),
+            ),
+          );
+        },
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
@@ -135,5 +193,3 @@ class _ProductCardState extends State<ProductCard> {
     );
   }
 }
-
-

@@ -1,33 +1,49 @@
-import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
 import 'dart:convert';
-import 'package:test1/beans/user.dart';
+import 'package:flutter/material.dart';
+import 'package:test1/beans/user.dart';  // Assuming User is a model class storing credentials
+import 'package:http/http.dart' as http;
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+
 
 class Buildgudang extends StatelessWidget {
   const Buildgudang({super.key});
 
   // Fetch products from the backend API using IP from the user object
   Future<List<dynamic>> fetchProducts() async {
-    // Ensure we have a user in the list, and use the first user as the default
-    if (userList.isEmpty) {
+    // Retrieve user credentials (you can fetch this from storage or any global state)
+    User? user = await User.getUserCredentials(); // Assuming this method fetches the saved user data
+
+    if (user == null) {
       throw Exception('No user data found');
     }
 
-    final serverIp = userList[0].serverIp; // Get server IP from the first user
+    final serverIp = user.serverIp; // Get server IP from the saved user object
 
-    // Make an HTTP GET request to fetch products using the server IP
-    final response = await http.get(Uri.parse('http://$serverIp:3000/products'));
+    // Make an HTTP POST request to fetch products using the server IP
+    final response = await http.post(
+      Uri.parse('http://$serverIp:3000/products'), // Change to POST request
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: json.encode({
+        'servername': serverIp,
+        'username': user.username, // Use saved username
+        'password': user.password, // Use saved password
+        'database': user.database, // Use saved database name
+      }),
+    );
 
     if (response.statusCode == 200) {
       // Parsing JSON hanya jika berhasil
       return json.decode(response.body)['products'];
     } else {
-      // Cetak status code dan body untuk debugging
+      // Print status code and body for debugging
       print('Failed to load products: ${response.statusCode}');
       print('Response body: ${response.body}');
       throw Exception('Failed to load products');
     }
   }
+
 
   @override
   Widget build(BuildContext context) {
@@ -54,7 +70,7 @@ class Buildgudang extends StatelessWidget {
               children: products.map((product) {
                 return ProductCard(
                   name: product['nama_barang'],
-                  price: product['harga_jual'],
+                  price: product['harga_jual'].toString(),
                 );
               }).toList(),
             ),

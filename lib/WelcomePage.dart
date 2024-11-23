@@ -3,6 +3,8 @@ import 'package:flutter/services.dart';
 import 'package:http/http.dart' as http;
 import 'package:test1/beans/user.dart';
 import 'dart:convert';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+
 
 class WelcomePage extends StatefulWidget {
   @override
@@ -29,6 +31,7 @@ class _WelcomePageState extends State<WelcomePage> {
     String password = _passwordController.text.trim();
     String database = _databaseController.text.trim();
 
+    // Validate fields before attempting to connect
     if (serverIp.isEmpty || username.isEmpty || database.isEmpty) {
       setState(() {
         _isLoading = false;
@@ -38,6 +41,7 @@ class _WelcomePageState extends State<WelcomePage> {
     }
 
     try {
+      // Send POST request to backend to verify database connection
       final response = await http.post(
         Uri.parse('http://$serverIp:3000/connect'),
         body: {
@@ -56,16 +60,20 @@ class _WelcomePageState extends State<WelcomePage> {
           _message = data['message'];
         });
 
+        // Successful connection
         if (data['status'] == 'success') {
-          // Add user to global list
-          userList.add(User(
+          // Save credentials securely in storage
+          await User.saveUserCredentials(User(
             serverIp: serverIp,
             username: username,
             password: password,
             database: database,
           ));
 
-          // Navigate to ProductsPage
+          // // Store connection information in session (optional)
+          // await _storeConnectionInSession(serverIp, username, password, database);
+
+          // Navigate to Home page
           Navigator.pushReplacementNamed(context, '/home');
         } else {
           setState(() {
@@ -85,6 +93,27 @@ class _WelcomePageState extends State<WelcomePage> {
       });
     }
   }
+
+  // Future<void> _storeConnectionInSession(
+  //   String serverIp, String username, String password, String database) async {
+  //   try {
+  //     // Send the session information to the backend to be saved in the user's session
+  //     final response = await http.post(
+  //       Uri.parse('http://$serverIp:3000/store-session'),
+  //       body: {
+  //         'servername': serverIp,
+  //         'username': username,
+  //         'password': password,
+  //         'database': database,
+  //       },
+  //     );
+  //     if (response.statusCode != 200) {
+  //       print('Failed to store session data');
+  //     }
+  //   } catch (e) {
+  //     print('Error storing session: $e');
+  //   }
+  // }
 
   @override
   Widget build(BuildContext context) {
@@ -115,6 +144,7 @@ class _WelcomePageState extends State<WelcomePage> {
                 ),
                 SizedBox(height: 20),
                 TextField(
+                  style: TextStyle(color: Colors.yellow),
                   controller: _ipController,
                   decoration: InputDecoration(
                     labelText: 'IP Address',
@@ -124,6 +154,7 @@ class _WelcomePageState extends State<WelcomePage> {
                 ),
                 SizedBox(height: 20),
                 TextField(
+                  style: TextStyle(color: Colors.yellow),
                   controller: _usernameController,
                   decoration: InputDecoration(
                     labelText: 'Username',
@@ -133,6 +164,7 @@ class _WelcomePageState extends State<WelcomePage> {
                 ),
                 SizedBox(height: 20),
                 TextField(
+                  style: TextStyle(color: Colors.yellow),
                   controller: _passwordController,
                   obscureText: true,
                   decoration: InputDecoration(
@@ -143,6 +175,7 @@ class _WelcomePageState extends State<WelcomePage> {
                 ),
                 SizedBox(height: 20),
                 TextField(
+                  style: TextStyle(color: Colors.yellow),
                   controller: _databaseController,
                   decoration: InputDecoration(
                     labelText: 'Database',
