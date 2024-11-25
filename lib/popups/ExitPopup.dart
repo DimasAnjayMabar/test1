@@ -30,14 +30,14 @@ class Exitpopup {
           child: Focus(
             autofocus: true, // Ensure focus is granted immediately
             child: AlertDialog(
-              title: Text(
+              title: const Text(
                 "Confirm Exit",
                 style: TextStyle(fontWeight: FontWeight.bold),
               ),
-              content: Text("Are you sure you want to exit?"),
+              content: const Text("Are you sure you want to exit?"),
               actions: <Widget>[
                 TextButton(
-                  child: Text(
+                  child: const Text(
                     "Cancel",
                     style: TextStyle(color: Colors.black),
                   ),
@@ -46,7 +46,7 @@ class Exitpopup {
                   },
                 ),
                 TextButton(
-                  child: Text(
+                  child: const Text(
                     "Exit",
                     style: TextStyle(color: Colors.black),
                   ),
@@ -63,12 +63,12 @@ class Exitpopup {
   }
 
   static Future<void> _handleLogout(BuildContext context) async {
-    final storage = FlutterSecureStorage();
+    const storage = FlutterSecureStorage();
 
     try {
       // Retrieve user credentials
       User? user = await User.getUserCredentials();
-      if (user == null || user.serverIp == null) {
+      if (user == null) {
         throw Exception("Invalid user credentials or missing server IP.");
       }
 
@@ -86,12 +86,12 @@ class Exitpopup {
         Navigator.of(context).pop(); // Close the dialog
         Navigator.pushReplacement(
           context,
-          MaterialPageRoute(builder: (context) => WelcomePage()),
+          MaterialPageRoute(builder: (context) => const WelcomePage()),
         );
       } else {
         // Show error message if logout fails
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text("Failed to log out. Please try again.")),
+          const SnackBar(content: Text("Failed to log out. Please try again.")),
         );
       }
     } catch (e) {

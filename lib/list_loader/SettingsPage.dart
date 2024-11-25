@@ -30,13 +30,13 @@ class _SettingspageState extends State<Settingspage> {
     return Scaffold(
       backgroundColor: Colors.grey[850],
       appBar: AppBar(
-        title: Text(
+        title: const Text(
           'Settings',
           style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
         ),
-        backgroundColor: Color(0xFF212529),
-        iconTheme: IconThemeData(color: Colors.white),
-        actions: [],
+        backgroundColor: const Color(0xFF212529),
+        iconTheme: const IconThemeData(color: Colors.white),
+        actions: const [],
       ),
       body: RawKeyboardListener(
         focusNode: _focusNode,  // Ensure the FocusNode is passed here
@@ -46,15 +46,14 @@ class _SettingspageState extends State<Settingspage> {
             if (event.logicalKey == LogicalKeyboardKey.escape) {
               // Navigate to NotesPage when Escape is pressed
               Navigator.pushAndRemoveUntil(
-  context,
-  MaterialPageRoute(builder: (context) => Homepage()),
-  (Route<dynamic> route) => false, // Removes all routes until the NotesPage
-);
-
+                context,
+                MaterialPageRoute(builder: (context) => const Homepage()),
+                (Route<dynamic> route) => false, // Removes all routes until the NotesPage
+              );
             }
           }
         },
-        child: SingleChildScrollView(
+        child: const SingleChildScrollView(
           padding: EdgeInsets.all(16),
           physics: BouncingScrollPhysics(), // Enable bounce effect
           child: Column(
@@ -89,7 +88,7 @@ class _ProductCardState extends State<ProductCard> {
     });
 
     // Briefly reset the press state to create a tap effect
-    Future.delayed(Duration(milliseconds: 100), () {
+    Future.delayed(const Duration(milliseconds: 100), () {
       if (mounted) {
         setState(() {
           _isPressed = false;
@@ -132,11 +131,11 @@ class _ProductCardState extends State<ProductCard> {
           });
         },
         child: AnimatedContainer(
-          duration: Duration(milliseconds: 300),
-          margin: EdgeInsets.symmetric(vertical: 8),
+          duration: const Duration(milliseconds: 300),
+          margin: const EdgeInsets.symmetric(vertical: 8),
           width: double.infinity,
           height: 70,
-          padding: EdgeInsets.symmetric(horizontal: 16),
+          padding: const EdgeInsets.symmetric(horizontal: 16),
           decoration: BoxDecoration(
             color: _isPressed
                 ? Colors.yellow[700]
@@ -155,14 +154,14 @@ class _ProductCardState extends State<ProductCard> {
             children: [
               Text(
                 widget.name,
-                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.white),
+                style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.white),
                 overflow: TextOverflow.ellipsis,
               ),
               Text(
                 widget.price,
                 style: TextStyle(fontSize: 14, color: Colors.grey[400]),
               ),
-              Icon(
+              const Icon(
                 Icons.arrow_forward,
                 color: Colors.white,
                 size: 18,

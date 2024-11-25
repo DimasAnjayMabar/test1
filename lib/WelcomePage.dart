@@ -3,10 +3,11 @@ import 'package:flutter/services.dart';
 import 'package:http/http.dart' as http;
 import 'package:test1/beans/user.dart';
 import 'dart:convert';
-import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 
 class WelcomePage extends StatefulWidget {
+  const WelcomePage({super.key});
+
   @override
   _WelcomePageState createState() => _WelcomePageState();
 }
@@ -118,7 +119,7 @@ class _WelcomePageState extends State<WelcomePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Color(0xFF212529),
+      backgroundColor: const Color(0xFF212529),
       body: RawKeyboardListener(
         focusNode: _focusNode,
         onKey: (RawKeyEvent event) {
@@ -134,7 +135,7 @@ class _WelcomePageState extends State<WelcomePage> {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Text(
+                const Text(
                   'Selamat Datang di Agus Plastik',
                   style: TextStyle(
                     fontSize: 30,
@@ -142,59 +143,59 @@ class _WelcomePageState extends State<WelcomePage> {
                     color: Colors.yellow,
                   ),
                 ),
-                SizedBox(height: 20),
+                const SizedBox(height: 20),
                 TextField(
-                  style: TextStyle(color: Colors.yellow),
+                  style: const TextStyle(color: Colors.yellow),
                   controller: _ipController,
-                  decoration: InputDecoration(
+                  decoration: const InputDecoration(
                     labelText: 'IP Address',
                     labelStyle: TextStyle(color: Colors.yellow),
                     border: OutlineInputBorder(),
                   ),
                 ),
-                SizedBox(height: 20),
+                const SizedBox(height: 20),
                 TextField(
-                  style: TextStyle(color: Colors.yellow),
+                  style: const TextStyle(color: Colors.yellow),
                   controller: _usernameController,
-                  decoration: InputDecoration(
+                  decoration: const InputDecoration(
                     labelText: 'Username',
                     labelStyle: TextStyle(color: Colors.yellow),
                     border: OutlineInputBorder(),
                   ),
                 ),
-                SizedBox(height: 20),
+                const SizedBox(height: 20),
                 TextField(
-                  style: TextStyle(color: Colors.yellow),
+                  style: const TextStyle(color: Colors.yellow),
                   controller: _passwordController,
                   obscureText: true,
-                  decoration: InputDecoration(
+                  decoration: const InputDecoration(
                     labelText: 'Password',
                     labelStyle: TextStyle(color: Colors.yellow),
                     border: OutlineInputBorder(),
                   ),
                 ),
-                SizedBox(height: 20),
+                const SizedBox(height: 20),
                 TextField(
-                  style: TextStyle(color: Colors.yellow),
+                  style: const TextStyle(color: Colors.yellow),
                   controller: _databaseController,
-                  decoration: InputDecoration(
+                  decoration: const InputDecoration(
                     labelText: 'Database',
                     labelStyle: TextStyle(color: Colors.yellow),
                     border: OutlineInputBorder(),
                   ),
                 ),
-                SizedBox(height: 20),
+                const SizedBox(height: 20),
                 ElevatedButton(
                   onPressed: _verifyConnection,
-                  child: Text('Verifikasi'),
+                  child: const Text('Verifikasi'),
                 ),
-                SizedBox(height: 20),
+                const SizedBox(height: 20),
                 if (_isLoading)
-                  CircularProgressIndicator()
+                  const CircularProgressIndicator()
                 else
                   Text(
                     _message,
-                    style: TextStyle(color: Colors.yellow),
+                    style: const TextStyle(color: Colors.yellow),
                   ),
               ],
             ),

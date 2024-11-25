@@ -8,6 +8,8 @@ import 'package:test1/list_loader/SettingsPage.dart';
 import 'package:test1/popups/ExitPopup.dart';
 
 class Homepage extends StatefulWidget {
+  const Homepage({super.key});
+
   @override
   HomepageState createState() => HomepageState();
 }
@@ -50,22 +52,22 @@ class HomepageState extends State<Homepage>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Color(0xFF212529),
+      backgroundColor: const Color(0xFF212529),
       appBar: AppBar(
-        title: Text('Agus Plastik',
+        title: const Text('Agus Plastik',
             style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
-        backgroundColor: Color(0xFF212529),
-        iconTheme: IconThemeData(color: Colors.white),
+        backgroundColor: const Color(0xFF212529),
+        automaticallyImplyLeading: false,
         actions: [
           IconButton(
-            icon: Icon(Icons.settings),
+            icon: const Icon(Icons.settings),
             color: Colors.grey,
             onPressed: () {
               Navigator.push(context,
-                  MaterialPageRoute(builder: (context) => Settingspage()));
+                  MaterialPageRoute(builder: (context) => const Settingspage()));
             },
           ),
-          SizedBox(width: 8),
+          const SizedBox(width: 8),
           RawKeyboardListener(
             focusNode: _focusNode,
             onKey: (RawKeyEvent event) {
@@ -76,28 +78,28 @@ class HomepageState extends State<Homepage>
               }
             },
             child: IconButton(
-              icon: Icon(Icons.exit_to_app),
+              icon: const Icon(Icons.exit_to_app),
               color: Colors.grey,
               onPressed: () {
                 Exitpopup.showExitPopup(context);
               },
             ),
           ),
-          SizedBox(width: 8),
+          const SizedBox(width: 8),
         ],
       ),
       body: TabBarView(
         controller: _tabController,
         children: [
-          _selectedIndex == 0 ? Buildgudang() : _buildTab(0, ""),
-          _selectedIndex == 1 ? Buildtransaksi() : _buildTab(1, ""),
-          _selectedIndex == 2 ? Buildhutang() : _buildTab(2, ""),
-          _selectedIndex == 3 ? Buildpiutang() : _buildTab(3, "")
+          _selectedIndex == 0 ? const Buildgudang() : _buildTab(0, ""),
+          _selectedIndex == 1 ? const Buildtransaksi() : _buildTab(1, ""),
+          _selectedIndex == 2 ? const Buildhutang() : _buildTab(2, ""),
+          _selectedIndex == 3 ? const Buildpiutang() : _buildTab(3, "")
         ],
       ),
       bottomNavigationBar: BottomNavigationBar(
         type: BottomNavigationBarType.fixed,
-        backgroundColor: Color(0xFF212529),
+        backgroundColor: const Color(0xFF212529),
         currentIndex: _selectedIndex,
         selectedItemColor: Colors.yellow,
         unselectedItemColor: Colors.grey,
@@ -136,7 +138,7 @@ class HomepageState extends State<Homepage>
   Widget _buildTab(int index, String text) {
     return Center(
       child: Text(text,
-          textAlign: TextAlign.center, style: TextStyle(color: Colors.black)),
+          textAlign: TextAlign.center, style: const TextStyle(color: Colors.black)),
     );
   }
 }

@@ -18,9 +18,9 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         fontFamily: 'Montserratt'
       ),
-      home: WelcomePage(),
+      home: const WelcomePage(),
       routes: {
-        '/home' : (context) => Homepage()
+        '/home' : (context) => const Homepage()
       },
     );
   }

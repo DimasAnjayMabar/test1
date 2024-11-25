@@ -30,8 +30,6 @@ CREATE TABLE distributor (
 -- Table for transaction details
 CREATE TABLE detail_transaksi (
     id_detail_transaksi INT AUTO_INCREMENT PRIMARY KEY,
-    id_transaksi INT NOT NULL,
-    id_barang INT NOT NULL,
     quantity INT NOT NULL,
     subtotal INT NOT NULL
 );

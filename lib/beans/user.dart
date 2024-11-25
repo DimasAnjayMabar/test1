@@ -14,7 +14,7 @@ class User {
   });
 
   // Save the user credentials securely
-  static final _storage = FlutterSecureStorage();
+  static const _storage = FlutterSecureStorage();
 
   // Save user credentials to secure storage
   static Future<void> saveUserCredentials(User user) async {
