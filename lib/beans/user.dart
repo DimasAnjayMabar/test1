@@ -31,16 +31,11 @@ class User {
     String? password = await _storage.read(key: 'password');
     String? database = await _storage.read(key: 'database');
 
-    // If any of the values are null, return null (i.e., no saved credentials)
-    if (serverIp == null || username == null || password == null || database == null) {
-      return null;
-    }
-
-    return User(
-      serverIp: serverIp,
-      username: username,
-      password: password,
-      database: database,
+     return User(
+      serverIp: serverIp ?? '',
+      username: username ?? '',
+      password: password ?? '',
+      database: database ?? '',
     );
   }
 

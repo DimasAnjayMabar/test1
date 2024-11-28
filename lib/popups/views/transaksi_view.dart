@@ -16,7 +16,7 @@ class ProductCard extends StatelessWidget {
   });
 
   // Function to fetch the product details by product ID
-  Future<Map<String, dynamic>> fetchProductDetails(int productId) async {
+  Future<Map<String, dynamic>> fetchProductDetails(int transactionId) async {
     try {
       final user = await User.getUserCredentials();
       if (user == null) {
@@ -25,14 +25,14 @@ class ProductCard extends StatelessWidget {
       final serverIp = user.serverIp;
 
       final response = await http.post(
-        Uri.parse('http://$serverIp:3000/product-details'),
+        Uri.parse('http://$serverIp:3000/transaction-details'),
         headers: {'Content-Type': 'application/json'},
         body: json.encode({
           'servername': serverIp,
           'username': user.username,
           'password': user.password,
           'database': user.database,
-          'product_id': productId,
+          'transaction_id': transactionId,
         }),
       );
 
@@ -42,8 +42,8 @@ class ProductCard extends StatelessWidget {
           throw Exception('Failed to load product details: ${data['message']}');
         }
 
-        if (data['products'] is Map<String, dynamic>) {
-          return data['products'];
+        if (data['transactions'] is Map<String, dynamic>) {
+          return data['transactions'];
         } else {
           throw Exception('Invalid product details format');
         }
@@ -65,17 +65,27 @@ class ProductCard extends StatelessWidget {
         context: context,
         builder: (BuildContext context) {
           return AlertDialog(
-            title: Text(productDetails['nama_barang'],
-                style: TextStyle(fontWeight: FontWeight.bold)),
+            title: Text('Transaksi ${productDetails['id_transaksi']}', style: TextStyle(fontWeight: FontWeight.bold)),
             content: SingleChildScrollView(
               child: ListBody(
                 children: <Widget>[
-                  Text('Price: ${productDetails['harga_jual']}'),
-                  Text('Buy Price: ${productDetails['harga_beli']}'),
-                  Text('Stock: ${productDetails['stok']}'),
-                  Text('Date: ${productDetails['tanggal_masuk']}'),
-                  Text('Barcode: ${productDetails['barcode']}'),
-                  Text('Debt: ${productDetails['hutang'] ? "Yes" : "No"}'),
+                  Text('Tanggal: ${productDetails['tanggal_transaksi']}'),
+                  Text('Customer: ${productDetails['nama_customer']}'),
+                  Text('No Telp: ${productDetails['no_telp_customer']}'),
+                  Text('Email: ${productDetails['email_customer']}'),
+                  Text('Grand Total: ${productDetails['total_harga']}'),
+                  Text('Receivable: ${productDetails['piutang'] ? "Yes" : "No"}'),
+                  const SizedBox(height: 10),
+                  const Text('Items:', style: TextStyle(fontWeight: FontWeight.bold)),
+                  ...productDetails['items'].map<Widget>((item) {
+                    return Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 4),
+                      child: Text(
+                        '${item['nama_barang']} - Qty: ${item['quantity']} - Subtotal: ${item['subtotal']}',
+                        style: const TextStyle(fontSize: 14),
+                      ),
+                    );
+                  }).toList(),
                 ],
               ),
             ),

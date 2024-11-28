@@ -25,7 +25,7 @@ class ProductCard extends StatelessWidget {
       final serverIp = user.serverIp;
 
       final response = await http.post(
-        Uri.parse('http://$serverIp:3000/product-details'),
+        Uri.parse('http://$serverIp:3000/debt-details'),
         headers: {'Content-Type': 'application/json'},
         body: json.encode({
           'servername': serverIp,
@@ -76,6 +76,13 @@ class ProductCard extends StatelessWidget {
                   Text('Date: ${productDetails['tanggal_masuk']}'),
                   Text('Barcode: ${productDetails['barcode']}'),
                   Text('Debt: ${productDetails['hutang'] ? "Yes" : "No"}'),
+                  const SizedBox(height: 10),
+                  const Text('Distrbutor:',
+                      style: TextStyle(fontWeight: FontWeight.bold)),
+                  Text('Nama: ${productDetails['nama_distributor']}'),
+                  Text('No Telp: ${productDetails['no_telp_distributor']}'),
+                  Text('Email: ${productDetails['email_distributor']}'),
+                  Text('Ecommerce: ${productDetails['link_ecommerce']}'),
                 ],
               ),
             ),
@@ -102,7 +109,7 @@ class ProductCard extends StatelessWidget {
                 onPressed: () {
                   Navigator.of(context).pop();
                 },
-                child: const Text('Create Barcode'),
+                child: const Text('Hubungi Distributor'),
               ),
             ],
           );

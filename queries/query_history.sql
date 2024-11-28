@@ -35,10 +35,12 @@ CREATE TABLE detail_transaksi (
 
 CREATE TABLE transaksi (
     id_transaksi serial PRIMARY KEY,
-    nama_customer VARCHAR(255),
     tanggal_transaksi DATE DEFAULT CURRENT_DATE,
     total_harga INT NOT NULL
 );
+
+alter table transaksi
+add column piutang boolean
 
 ALTER TABLE barang
 ADD COLUMN id_distributor INT,
@@ -139,18 +141,6 @@ SELECT nt.id_transaksi, 2, 1, 15000 FROM new_transaksi nt
 UNION ALL
 SELECT nt.id_transaksi, 3, 5, 50000 FROM new_transaksi nt;
 
--- Step 3: Update total_harga in transaksi using the id_transaksi from the same query
-WITH total AS (
-    SELECT nt.id_transaksi, SUM(dt.subtotal) AS grand_total
-    FROM new_transaksi nt
-    JOIN detail_transaksi dt ON nt.id_transaksi = dt.id_transaksi
-    GROUP BY nt.id_transaksi
-)
-UPDATE transaksi t
-SET total_harga = total.grand_total
-FROM total
-WHERE t.id_transaksi = total.id_transaksi;
-
 -- Step 3: Update total_harga in transaksi
 UPDATE transaksi t
 SET total_harga = (
@@ -159,6 +149,10 @@ SET total_harga = (
     WHERE id_transaksi = t.id_transaksi
 )
 WHERE t.id_transaksi = 9;  -- Replace with actual id_transaksi
+
+update transaksi
+set piutang = true
+where id_transaksi = 3
 
 alter table transaksi
 add column piutang boolean;
