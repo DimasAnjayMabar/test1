@@ -18,7 +18,7 @@ class ProductCard extends StatelessWidget {
   });
 
   // Function to fetch the product details by product ID
-  Future<Map<String, dynamic>> fetchProductDetails(int productId) async {
+  Future<Map<String, dynamic>> fetchProductDetails(int distributorId) async {
     try {
       final user = await User.getUserCredentials();
       if (user == null) {
@@ -27,14 +27,14 @@ class ProductCard extends StatelessWidget {
       final serverIp = user.serverIp;
 
       final response = await http.post(
-        Uri.parse('http://$serverIp:3000/debt-details'),
+        Uri.parse('http://$serverIp:3000/distributor-details'),
         headers: {'Content-Type': 'application/json'},
         body: json.encode({
           'servername': serverIp,
           'username': user.username,
           'password': user.password,
           'database': user.database,
-          'product_id': productId,
+          'distributor_id': distributorId,
         }),
       );
 
@@ -44,17 +44,17 @@ class ProductCard extends StatelessWidget {
           throw Exception('Failed to load product details: ${data['message']}');
         }
 
-        if (data['products'] is Map<String, dynamic>) {
-          return data['products'];
+        if (data['distributors'] is Map<String, dynamic>) {
+          return data['distributors'];
         } else {
-          throw Exception('Invalid product details format');
+          throw Exception('Invalid data details format');
         }
       } else {
-        throw Exception('Failed to load product details: ${response.statusCode}');
+        throw Exception('Failed to load distributors details: ${response.statusCode}');
       }
     } catch (e) {
-      print('Error fetching product details: $e');
-      throw Exception('Error fetching product details');
+      print('Error fetching distributor details: $e');
+      throw Exception('Error fetching deistributor details');
     }
   }
 
@@ -67,21 +67,11 @@ class ProductCard extends StatelessWidget {
         context: context,
         builder: (BuildContext context) {
           return AlertDialog(
-            title: Text(productDetails['nama_barang'],
+            title: Text(productDetails['nama_distributor'],
                 style: const TextStyle(fontWeight: FontWeight.bold)),
             content: SingleChildScrollView(
               child: ListBody(
                 children: <Widget>[
-                  Text('Harga Jual: ${productDetails['harga_jual']}'),
-                  Text('Harga Beli: ${productDetails['harga_beli']}'),
-                  Text('Stok: ${productDetails['stok']}'),
-                  Text('Tanggal: ${DateFormat('yyyy-MM-dd').format(DateTime.parse(productDetails['tanggal_masuk']))}'),
-                  Text('Barcode: ${productDetails['barcode']}'),
-                  Text('Hutang: ${productDetails['hutang'] ? "Ya" : "Tidak"}'),
-                  const SizedBox(height: 10),
-                  const Text('Distrbutor:',
-                      style: TextStyle(fontWeight: FontWeight.bold)),
-                  Text('Nama: ${productDetails['nama_distributor']}'),
                   Text('No Telp: ${productDetails['no_telp_distributor']}'),
                   Text('Email: ${productDetails['email_distributor']}'),
                   Text('Ecommerce: ${productDetails['link_ecommerce']}'),
@@ -106,12 +96,6 @@ class ProductCard extends StatelessWidget {
                   Navigator.of(context).pop();
                 },
                 child: const Text('Hapus'),
-              ),
-              TextButton(
-                onPressed: () {
-                  Navigator.of(context).pop();
-                },
-                child: const Text('Hubungi Distributor'),
               ),
             ],
           );

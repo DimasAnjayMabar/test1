@@ -2,6 +2,8 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:test1/beans/user.dart';
+import 'package:intl/intl.dart';
+
 
 class ProductCard extends StatelessWidget {
   final String name;
@@ -66,16 +68,23 @@ class ProductCard extends StatelessWidget {
         builder: (BuildContext context) {
           return AlertDialog(
             title: Text(productDetails['nama_barang'],
-                style: TextStyle(fontWeight: FontWeight.bold)),
+                style: const TextStyle(fontWeight: FontWeight.bold)),
             content: SingleChildScrollView(
               child: ListBody(
                 children: <Widget>[
-                  Text('Price: ${productDetails['harga_jual']}'),
-                  Text('Buy Price: ${productDetails['harga_beli']}'),
-                  Text('Stock: ${productDetails['stok']}'),
-                  Text('Date: ${productDetails['tanggal_masuk']}'),
+                  Text('Harga Jual: ${productDetails['harga_jual']}'),
+                  Text('Harga Beli: ${productDetails['harga_beli']}'),
+                  Text('Stok: ${productDetails['stok']}'),
+                  Text('Tanggal: ${DateFormat('yyyy-MM-dd').format(DateTime.parse(productDetails['tanggal_masuk']))}'),
                   Text('Barcode: ${productDetails['barcode']}'),
-                  Text('Debt: ${productDetails['hutang'] ? "Yes" : "No"}'),
+                  Text('Hutang: ${productDetails['hutang'] ? "Ya" : "Tidak"}'),
+                  const SizedBox(height: 10),
+                  const Text('Distrbutor:',
+                      style: TextStyle(fontWeight: FontWeight.bold)),
+                  Text('Nama: ${productDetails['nama_distributor']}'),
+                  Text('No Telp: ${productDetails['no_telp_distributor']}'),
+                  Text('Email: ${productDetails['email_distributor']}'),
+                  Text('Ecommerce: ${productDetails['link_ecommerce']}'),
                 ],
               ),
             ),
@@ -84,7 +93,7 @@ class ProductCard extends StatelessWidget {
                 onPressed: () {
                   Navigator.of(context).pop();
                 },
-                child: const Text('Close'),
+                child: const Text('Kembali'),
               ),
               TextButton(
                 onPressed: () {
@@ -96,13 +105,13 @@ class ProductCard extends StatelessWidget {
                 onPressed: () {
                   Navigator.of(context).pop();
                 },
-                child: const Text('Delete'),
+                child: const Text('Hapus'),
               ),
               TextButton(
                 onPressed: () {
                   Navigator.of(context).pop();
                 },
-                child: const Text('Create Barcode'),
+                child: const Text('Buat Barcode'),
               ),
             ],
           );

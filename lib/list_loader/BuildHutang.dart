@@ -31,9 +31,9 @@ class Buildhutang extends StatelessWidget {
     );
 
     if (response.statusCode == 200) {
-      return json.decode(response.body)['products'];
+      return json.decode(response.body)['debts'];
     } else {
-      throw Exception('Failed to load products');
+      throw Exception('Failed to load debts');
     }
   }
 
@@ -49,25 +49,25 @@ class Buildhutang extends StatelessWidget {
           } else if (snapshot.hasError) {
             return Center(child: Text('Error: ${snapshot.error}'));
           } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-            return const Center(child: Text('No products available'));
+            return const Center(child: Text('No debts available'));
           }
 
-          final products = snapshot.data!;
+          final debts = snapshot.data!;
 
           return SingleChildScrollView(
             padding: const EdgeInsets.all(16),
             child: Column(
-              children: products.map((product) {
-                final productId = product['id_barang'];
-                if (productId == null) {
+              children: debts.map((debt) {
+                final debtId = debt['id_barang'];
+                if (debtId == null) {
                   print('Error: Product ID is null');
                   return const SizedBox.shrink();
                 }
 
                 return ProductCard(
-                  id: productId,
-                  name: product['nama_barang'],
-                  price: product['harga_jual'].toString(),
+                  id: debtId,
+                  name: debt['nama_barang'],
+                  price: debt['harga_jual'].toString(),
                 );
               }).toList(),
             ),

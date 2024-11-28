@@ -4,6 +4,8 @@ import 'package:http/http.dart' as http;
 import 'package:test1/beans/user.dart';
 
 class AddProductPopup extends StatefulWidget {
+  const AddProductPopup({super.key});
+
   @override
   _AddProductPopupState createState() => _AddProductPopupState();
 }
@@ -16,17 +18,61 @@ class _AddProductPopupState extends State<AddProductPopup> {
   int? hargaJual;
   int? stok;
   double profitPercentage = 0;
-  DateTime tanggalMasuk = DateTime.now();
   bool hutang = false;
+  String? selectedDistributorId;
+  List<Map<String, String>> distributors = []; // List to store distributor data
 
   // Function to calculate the selling price based on profit percentage
   void _calculateHargaJual() {
     if (hargaBeli != null) {
       setState(() {
-        hargaJual = hargaBeli! + (hargaBeli! * (profitPercentage / 100)).round();
+        hargaJual =
+            hargaBeli! + (hargaBeli! * (profitPercentage / 100)).round();
       });
     }
   }
+
+  // Fetch distributors from the database
+  Future<void> _fetchDistributors() async {
+    try {
+      final user = await User.getUserCredentials();
+      if (user == null) throw Exception('User not found');
+
+      final response = await http.post(
+        Uri.parse('http://${user.serverIp}:3000/distributors'),
+        headers: {'Content-Type': 'application/json'},
+        body: json.encode({
+          'servername': user.serverIp,
+          'username': user.username,
+          'password': user.password,
+          'database': user.database,
+        }),
+      );
+
+      if (response.statusCode == 200) {
+        final data = json.decode(response.body);
+
+        setState(() {
+          distributors = List<Map<String, String>>.from(
+            data['distributors'].map((distributor) {
+              // Ensure that the 'id_distributor' and 'nama_distributor' are cast to strings
+              return {
+                'id_distributor': distributor['id_distributor'].toString(),
+                'nama_distributor': distributor['nama_distributor'].toString(),
+              };
+            }),
+          );
+        });
+      } else {
+        throw Exception('Failed to fetch distributors');
+      }
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error fetching distributors: $e')),
+      );
+    }
+  }
+
 
   // Function to send the data to the server
   Future<void> _submitForm() async {
@@ -34,26 +80,34 @@ class _AddProductPopupState extends State<AddProductPopup> {
       _formKey.currentState!.save();
 
       try {
-        final user = await User.getUserCredentials(); // Assuming user info is stored
+        final user = await User.getUserCredentials();
         if (user == null) throw Exception('User not found');
 
         final response = await http.post(
-          Uri.parse('http://${user.serverIp}:3000/add-barang'),
+          Uri.parse('http://${user.serverIp}:3000/new-product'),
           headers: {'Content-Type': 'application/json'},
           body: json.encode({
+            'servername': user.serverIp,
+            'username': user.username,
+            'password': user.password,
+            'database': user.database,
             'nama_barang': namaBarang,
             'harga_beli': hargaBeli,
             'harga_jual': hargaJual,
-            'tanggal_masuk': tanggalMasuk.toIso8601String(),
             'stok': stok,
             'hutang': hutang,
+            'id_distributor': int.tryParse(selectedDistributorId ?? ''), // Convert to int
           }),
         );
 
         if (response.statusCode == 200) {
-          Navigator.of(context).pop(true); // Close the dialog and return success
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Product added successfully!')),
+          );
+          Navigator.of(context)
+              .pop(true); // Close the dialog and return success
         } else {
-          throw Exception('Failed to add product');
+          throw Exception('Failed to add product: ${response.body}');
         }
       } catch (e) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -64,9 +118,18 @@ class _AddProductPopupState extends State<AddProductPopup> {
   }
 
   @override
+  void initState() {
+    super.initState();
+    _fetchDistributors(); // Fetch distributors when the form loads
+  }
+
+  @override
   Widget build(BuildContext context) {
     return AlertDialog(
-      title: const Text('Add New Product'),
+      title: const Text(
+        'Tambah Barang Baru',
+        style: TextStyle(fontWeight: FontWeight.bold),
+      ),
       content: SingleChildScrollView(
         child: Form(
           key: _formKey,
@@ -76,7 +139,8 @@ class _AddProductPopupState extends State<AddProductPopup> {
               TextFormField(
                 decoration: const InputDecoration(labelText: 'Nama Barang'),
                 validator: (value) {
-                  if (value == null || value.isEmpty) return 'Enter product name';
+                  if (value == null || value.isEmpty)
+                    return 'Masukkan nama produk';
                   return null;
                 },
                 onSaved: (value) => namaBarang = value,
@@ -85,7 +149,8 @@ class _AddProductPopupState extends State<AddProductPopup> {
                 decoration: const InputDecoration(labelText: 'Harga Beli'),
                 keyboardType: TextInputType.number,
                 validator: (value) {
-                  if (value == null || int.tryParse(value) == null) return 'Enter a valid price';
+                  if (value == null || int.tryParse(value) == null)
+                    return 'Masukkan harga dengan benar';
                   return null;
                 },
                 onChanged: (value) {
@@ -96,10 +161,12 @@ class _AddProductPopupState extends State<AddProductPopup> {
                 },
               ),
               TextFormField(
-                decoration: const InputDecoration(labelText: 'Profit Percentage (%)'),
+                decoration:
+                    const InputDecoration(labelText: 'Persen Profit (%)'),
                 keyboardType: TextInputType.number,
                 validator: (value) {
-                  if (value == null || double.tryParse(value) == null) return 'Enter a valid percentage';
+                  if (value == null || double.tryParse(value) == null)
+                    return 'Masukkan hanya angka biasa (sudah dalam bentuk persen)';
                   return null;
                 },
                 onChanged: (value) {
@@ -110,44 +177,35 @@ class _AddProductPopupState extends State<AddProductPopup> {
                 },
               ),
               TextFormField(
-                decoration: InputDecoration(
-                  labelText: 'Harga Jual (Calculated)',
-                  hintText: hargaJual?.toString() ?? '0',
-                ),
-                readOnly: true,
-              ),
-              TextFormField(
                 decoration: const InputDecoration(labelText: 'Stok'),
                 keyboardType: TextInputType.number,
                 validator: (value) {
-                  if (value == null || int.tryParse(value) == null) return 'Enter stock quantity';
+                  if (value == null || int.tryParse(value) == null)
+                    return 'Masukkan stok barang';
                   return null;
                 },
                 onSaved: (value) => stok = int.parse(value!),
               ),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  const Text('Tanggal Masuk:'),
-                  TextButton(
-                    onPressed: () async {
-                      final selectedDate = await showDatePicker(
-                        context: context,
-                        initialDate: tanggalMasuk,
-                        firstDate: DateTime(2000),
-                        lastDate: DateTime.now(),
+              DropdownButtonFormField<String>(
+                decoration: const InputDecoration(labelText: 'Distributor'),
+                items: distributors
+                    .map((distributor) {
+                      // Ensure 'id_distributor' is treated as a string
+                      return DropdownMenuItem<String>(
+                        value: distributor['id_distributor']?.toString(), // Convert to String
+                        child: Text(distributor['nama_distributor']!),
                       );
-                      if (selectedDate != null) {
-                        setState(() {
-                          tanggalMasuk = selectedDate;
-                        });
-                      }
-                    },
-                    child: Text(
-                      '${tanggalMasuk.toLocal()}'.split(' ')[0],
-                    ),
-                  ),
-                ],
+                    })
+                    .toList(),
+                onChanged: (value) {
+                  // Ensure value is a String
+                  setState(() => selectedDistributorId = value);
+                },
+                validator: (value) {
+                  if (value == null || value.isEmpty)
+                    return 'Pilih distributor';
+                  return null;
+                },
               ),
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -170,11 +228,11 @@ class _AddProductPopupState extends State<AddProductPopup> {
       actions: [
         TextButton(
           onPressed: () => Navigator.of(context).pop(false), // Cancel action
-          child: const Text('Cancel'),
+          child: const Text('Kembali'),
         ),
         ElevatedButton(
           onPressed: _submitForm,
-          child: const Text('Add'),
+          child: const Text('Tambah'),
         ),
       ],
     );

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:test1/list_loader/BuildDistributor.dart';
 import 'package:test1/list_loader/BuildGudang.dart';
 import 'package:test1/list_loader/BuildHutang.dart';
 import 'package:test1/list_loader/BuildPiutang.dart';
@@ -25,7 +26,7 @@ class HomepageState extends State<Homepage>
   void initState() {
     super.initState();
     // Initialize TabController for managing tabs
-    _tabController = TabController(length: 4, vsync: this);
+    _tabController = TabController(length: 5, vsync: this);
     _tabController?.addListener(_onTabChanged);
   }
 
@@ -94,7 +95,8 @@ class HomepageState extends State<Homepage>
           _selectedIndex == 0 ? const Buildgudang() : _buildTab(0, ""),
           _selectedIndex == 1 ? const Buildtransaksi() : _buildTab(1, ""),
           _selectedIndex == 2 ? const Buildhutang() : _buildTab(2, ""),
-          _selectedIndex == 3 ? const Buildpiutang() : _buildTab(3, "")
+          _selectedIndex == 3 ? const Buildpiutang() : _buildTab(3, ""),
+          _selectedIndex == 4 ? const Builddistributor() : _buildTab(4, "")
         ],
       ),
       bottomNavigationBar: BottomNavigationBar(
@@ -129,6 +131,11 @@ class HomepageState extends State<Homepage>
             icon: Icon(Icons.request_quote,
                 color: _selectedIndex == 3 ? Colors.yellow : Colors.grey[500]),
             label: 'Piutang',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.local_shipping,
+                color: _selectedIndex == 4 ? Colors.yellow : Colors.grey[500]),
+            label: 'Distributor',
           ),
         ],
       ),

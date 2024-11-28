@@ -33,7 +33,7 @@ class Buildtransaksi extends StatelessWidget {
     if (response.statusCode == 200) {
       return json.decode(response.body)['transactions'];
     } else {
-      throw Exception('Failed to load products');
+      throw Exception('Failed to load transactions');
     }
   }
 
@@ -49,16 +49,16 @@ class Buildtransaksi extends StatelessWidget {
           } else if (snapshot.hasError) {
             return Center(child: Text('Error: ${snapshot.error}'));
           } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-            return const Center(child: Text('No products available'));
+            return const Center(child: Text('No transactions available'));
           }
 
-          final products = snapshot.data!;
+          final transactions = snapshot.data!;
 
           return SingleChildScrollView(
             padding: const EdgeInsets.all(16),
             child: Column(
-              children: products.map((product) {
-                final transactionId = product['id_transaksi'];
+              children: transactions.map((transaction) {
+                final transactionId = transaction['id_transaksi'];
                 if (transactionId == null) {
                   print('Error: Product ID is null');
                   return const SizedBox.shrink();
@@ -66,8 +66,8 @@ class Buildtransaksi extends StatelessWidget {
 
                 return ProductCard(
                   id: transactionId,
-                  name: product['nama_customer'],
-                  price: product['total_harga'].toString(),
+                  name: transaction['nama_customer'],
+                  price: transaction['total_harga'].toString(),
                 );
               }).toList(),
             ),

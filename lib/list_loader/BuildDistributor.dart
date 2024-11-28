@@ -2,10 +2,10 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:test1/beans/user.dart';
-import '../popups/views/piutang_view.dart';
+import '../popups/views/distributor_view.dart';
 
-class Buildpiutang extends StatelessWidget {
-  const Buildpiutang({super.key});
+class Builddistributor extends StatelessWidget {
+  const Builddistributor({super.key});
 
   // Fetch products from the backend API using IP from the user object
   Future<List<dynamic>> fetchProducts() async {
@@ -18,7 +18,7 @@ class Buildpiutang extends StatelessWidget {
     final serverIp = user.serverIp;
 
     final response = await http.post(
-      Uri.parse('http://$serverIp:3000/transactions'),
+      Uri.parse('http://$serverIp:3000/distributors'),
       headers: {
         'Content-Type': 'application/json',
       },
@@ -31,9 +31,9 @@ class Buildpiutang extends StatelessWidget {
     );
 
     if (response.statusCode == 200) {
-      return json.decode(response.body)['transactions'];
+      return json.decode(response.body)['distributors'];
     } else {
-      throw Exception('Failed to load products');
+      throw Exception('Failed to load distributors');
     }
   }
 
@@ -49,25 +49,25 @@ class Buildpiutang extends StatelessWidget {
           } else if (snapshot.hasError) {
             return Center(child: Text('Error: ${snapshot.error}'));
           } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-            return const Center(child: Text('No receivables available'));
+            return const Center(child: Text('No distributors available'));
           }
 
-          final receivables = snapshot.data!;
+          final distributors = snapshot.data!;
 
           return SingleChildScrollView(
             padding: const EdgeInsets.all(16),
             child: Column(
-              children: receivables.map((receivable) {
-                final transactionId = receivable['id_transaksi'];
-                if (transactionId == null) {
+              children: distributors.map((distributor) {
+                final distributorId = distributor['id_distributor'];
+                if (distributorId == null) {
                   print('Error: Product ID is null');
                   return const SizedBox.shrink();
                 }
 
                 return ProductCard(
-                  id: transactionId, // Pass the product ID correctly
-                  name: receivable['nama_customer'],
-                  price: receivable['total_harga'].toString(),
+                  id: distributorId,
+                  name: distributor['nama_distributor'],
+                  price: distributor['no_telp_distributor'].toString(),
                 );
               }).toList(),
             ),

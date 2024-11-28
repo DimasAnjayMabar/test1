@@ -2,6 +2,8 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:test1/beans/user.dart';
+import 'package:intl/intl.dart';
+
 
 class ProductCard extends StatelessWidget {
   final String name;
@@ -65,16 +67,16 @@ class ProductCard extends StatelessWidget {
         context: context,
         builder: (BuildContext context) {
           return AlertDialog(
-            title: Text('Transaksi ${productDetails['id_transaksi']}', style: TextStyle(fontWeight: FontWeight.bold)),
+            title: Text('Transaksi ${productDetails['id_transaksi']}', style: const TextStyle(fontWeight: FontWeight.bold)),
             content: SingleChildScrollView(
               child: ListBody(
                 children: <Widget>[
-                  Text('Tanggal: ${productDetails['tanggal_transaksi']}'),
+                  Text('Tanggal: ${DateFormat('yyyy-MM-dd').format(DateTime.parse(productDetails['tanggal_transaksi']))}'),
                   Text('Customer: ${productDetails['nama_customer']}'),
                   Text('No Telp: ${productDetails['no_telp_customer']}'),
                   Text('Email: ${productDetails['email_customer']}'),
-                  Text('Grand Total: ${productDetails['total_harga']}'),
-                  Text('Receivable: ${productDetails['piutang'] ? "Yes" : "No"}'),
+                  Text('Total Harga: ${productDetails['total_harga']}'),
+                  Text('Piutang: ${productDetails['piutang'] ? "Ya" : "Tidak"}'),
                   const SizedBox(height: 10),
                   const Text('Items:', style: TextStyle(fontWeight: FontWeight.bold)),
                   ...productDetails['items'].map<Widget>((item) {
@@ -94,7 +96,7 @@ class ProductCard extends StatelessWidget {
                 onPressed: () {
                   Navigator.of(context).pop();
                 },
-                child: const Text('Close'),
+                child: const Text('Kembali'),
               ),
               TextButton(
                 onPressed: () {
@@ -106,13 +108,7 @@ class ProductCard extends StatelessWidget {
                 onPressed: () {
                   Navigator.of(context).pop();
                 },
-                child: const Text('Delete'),
-              ),
-              TextButton(
-                onPressed: () {
-                  Navigator.of(context).pop();
-                },
-                child: const Text('Create Barcode'),
+                child: const Text('Hapus'),
               ),
             ],
           );
