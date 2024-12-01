@@ -1,14 +1,22 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:test1/beans/b_tree_class.dart';
 import 'package:test1/beans/user.dart';
 import '../popups/views/transaksi_view.dart';
 
-class Buildtransaksi extends StatelessWidget {
-  const Buildtransaksi({super.key});
+class Buildtransaksi extends StatefulWidget {
+  @override
+  _BuildTransaksiState createState() => _BuildTransaksiState();
+}
 
-  // Fetch products from the backend API using IP from the user object
-  Future<List<dynamic>> fetchProducts() async {
+class _BuildTransaksiState extends State<Buildtransaksi> {
+  final TextEditingController _searchController = TextEditingController();
+  List<dynamic> _filteredTransactions = [];
+  final BTree _transactionBTree = BTree(3); // Degree of the tree
+
+  // Fetch products from the backend API and insert them into the B-Tree
+  Future<void> fetchProducts() async {
     User? user = await User.getUserCredentials();
 
     if (user == null) {
@@ -31,52 +39,87 @@ class Buildtransaksi extends StatelessWidget {
     );
 
     if (response.statusCode == 200) {
-      return json.decode(response.body)['transactions'];
+      final transactions = json.decode(response.body)['transactions'];
+      setState(() {
+        _filteredTransactions = transactions; // Initially show all products
+
+        // Insert products into the B-Tree
+        for (var transaction in transactions) {
+          final lowerCaseName = transaction['nama_customer'].toLowerCase(); // Convert product name to lowercase
+          _transactionBTree.insert(lowerCaseName, transaction);
+        }
+      });
     } else {
-      throw Exception('Failed to load transactions');
+      throw Exception('Failed to load products');
     }
+  }
+
+  // Search products based on user input using the B-Tree
+  void _searchProducts(String query) {
+    final lowerCaseQuery = query.toLowerCase();
+    final matchedTransactions = _transactionBTree.searchBySubstring(lowerCaseQuery); // Use substring search
+    setState(() {
+      _filteredTransactions = matchedTransactions.toSet().toList(); // Remove duplicates if any
+    });
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    fetchProducts();
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.grey[850],
-      body: FutureBuilder<List<dynamic>>(
-        future: fetchProducts(),
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return const Center(child: CircularProgressIndicator());
-          } else if (snapshot.hasError) {
-            return Center(child: Text('Error: ${snapshot.error}'));
-          } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-            return const Center(child: Text('No transactions available'));
-          }
-
-          final transactions = snapshot.data!;
-
-          return SingleChildScrollView(
-            padding: const EdgeInsets.all(16),
-            child: Column(
-              children: transactions.map((transaction) {
-                final transactionId = transaction['id_transaksi'];
-                if (transactionId == null) {
-                  print('Error: Product ID is null');
-                  return const SizedBox.shrink();
-                }
-
-                return ProductCard(
-                  id: transactionId,
-                  name: transaction['nama_customer'],
-                  price: transaction['total_harga'].toString(),
-                );
-              }).toList(),
+      body: Column(
+        children: [
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: TextField(
+              controller: _searchController,
+              onChanged: _searchProducts,
+              decoration: InputDecoration(
+                labelText: 'Search Transactions',
+                filled: true,
+                fillColor: Colors.grey[700],
+                prefixIcon: const Icon(Icons.search, color: Colors.white),
+                labelStyle: const TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.bold,
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderSide: BorderSide(color: Colors.white, width: 2),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                enabledBorder: OutlineInputBorder(
+                  borderSide: BorderSide(color: Colors.white, width: 1),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+              ),
             ),
-          );
-        },
+          ),
+          Expanded(
+            child: _filteredTransactions.isEmpty
+                ? const Center(child: Text('No products available'))
+                : ListView.builder(
+                    itemCount: _filteredTransactions.length,
+                    itemBuilder: (context, index) {
+                      final product = _filteredTransactions[index];
+                      return ProductCard(
+                        id: product['id_transaksi'],
+                        name: product['nama_customer'],
+                        price: product['total_harga'].toString(),
+                      );
+                    },
+                  ),
+          ),
+        ],
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
-          // Action for FAB
+          
         },
         backgroundColor: Colors.orange,
         child: const Icon(Icons.add),

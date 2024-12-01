@@ -92,8 +92,8 @@ class HomepageState extends State<Homepage>
       body: TabBarView(
         controller: _tabController,
         children: [
-          _selectedIndex == 0 ? const Buildgudang() : _buildTab(0, ""),
-          _selectedIndex == 1 ? const Buildtransaksi() : _buildTab(1, ""),
+          _selectedIndex == 0 ? Buildgudang() : _buildTab(0, ""),
+          _selectedIndex == 1 ? Buildtransaksi() : _buildTab(1, ""),
           _selectedIndex == 2 ? const Buildhutang() : _buildTab(2, ""),
           _selectedIndex == 3 ? const Buildpiutang() : _buildTab(3, ""),
           _selectedIndex == 4 ? const Builddistributor() : _buildTab(4, "")
