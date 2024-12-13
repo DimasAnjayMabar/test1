@@ -4,7 +4,6 @@ import 'package:http/http.dart' as http;
 import 'package:test1/beans/user.dart';
 import 'package:intl/intl.dart';
 
-
 class ProductCard extends StatelessWidget {
   final String name;
   final String price;
@@ -18,7 +17,7 @@ class ProductCard extends StatelessWidget {
   });
 
   // Function to fetch the product details by product ID
-  Future<Map<String, dynamic>> fetchProductDetails(int transactionId) async {
+  Future<Map<String, dynamic>> fetchTransactionDetails(int transactionId) async {
     try {
       final user = await User.getUserCredentials();
       if (user == null) {
@@ -59,9 +58,9 @@ class ProductCard extends StatelessWidget {
   }
 
   // Function to show the product details in a dialog
-  Future<void> _showProductDetails(BuildContext context) async {
+  Future<void> _showTransactionDetails(BuildContext context) async {
     try {
-      final productDetails = await fetchProductDetails(id);
+      final productDetails = await fetchTransactionDetails(id);
 
       showDialog(
         context: context,
@@ -123,7 +122,7 @@ class ProductCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: () async {
-        await _showProductDetails(context);
+        await _showTransactionDetails(context);
       },
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 300),

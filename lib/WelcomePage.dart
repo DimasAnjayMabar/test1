@@ -4,7 +4,7 @@ import 'package:http/http.dart' as http;
 import 'package:test1/beans/user.dart';
 import 'dart:convert';
 
-
+//fungsi untuk koneksi aplikasi dengan database
 class WelcomePage extends StatefulWidget {
   const WelcomePage({super.key});
 
@@ -13,26 +13,30 @@ class WelcomePage extends StatefulWidget {
 }
 
 class _WelcomePageState extends State<WelcomePage> {
+  //controller text field
   final TextEditingController _ipController = TextEditingController();
   final TextEditingController _usernameController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
   final TextEditingController _databaseController = TextEditingController();
 
-  final FocusNode _focusNode = FocusNode();
+  //inisialisasi
+  final FocusNode _focusNode = FocusNode(); 
   bool _isLoading = false;
   String _message = '';
 
   Future<void> _verifyConnection() async {
+    //inisialisasi ketika gagal login atau lama koneksi ke database
     setState(() {
       _isLoading = true;
     });
 
+    //mendapatkan text dari text field
     String serverIp = _ipController.text.trim();
     String username = _usernameController.text.trim();
     String password = _passwordController.text.trim();
     String database = _databaseController.text.trim();
 
-    // Validate fields before attempting to connect
+    //cek apakah text field kosong
     if (serverIp.isEmpty || username.isEmpty || database.isEmpty) {
       setState(() {
         _isLoading = false;
@@ -41,8 +45,9 @@ class _WelcomePageState extends State<WelcomePage> {
       return;
     }
 
+    //mencoba koneksi ke dalam backend
     try {
-      // Send POST request to backend to verify database connection
+      //mengirim identitas databae ke dalam backend body
       final response = await http.post(
         Uri.parse('http://$serverIp:3000/connect'),
         body: {
@@ -52,7 +57,8 @@ class _WelcomePageState extends State<WelcomePage> {
           'database': database,
         },
       );
-
+      
+      //jika status sukses
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
 
@@ -61,9 +67,8 @@ class _WelcomePageState extends State<WelcomePage> {
           _message = data['message'];
         });
 
-        // Successful connection
         if (data['status'] == 'success') {
-          // Save credentials securely in storage
+          //menyimpan text field identitas database ke dalam sebuah secure storage (flutter secure storage)
           await User.saveUserCredentials(User(
             serverIp: serverIp,
             username: username,
@@ -71,10 +76,7 @@ class _WelcomePageState extends State<WelcomePage> {
             database: database,
           ));
 
-          // // Store connection information in session (optional)
-          // await _storeConnectionInSession(serverIp, username, password, database);
-
-          // Navigate to Home page
+          //mengalihkan ke homepage
           Navigator.pushReplacementNamed(context, '/home');
         } else {
           setState(() {
@@ -95,32 +97,14 @@ class _WelcomePageState extends State<WelcomePage> {
     }
   }
 
-  // Future<void> _storeConnectionInSession(
-  //   String serverIp, String username, String password, String database) async {
-  //   try {
-  //     // Send the session information to the backend to be saved in the user's session
-  //     final response = await http.post(
-  //       Uri.parse('http://$serverIp:3000/store-session'),
-  //       body: {
-  //         'servername': serverIp,
-  //         'username': username,
-  //         'password': password,
-  //         'database': database,
-  //       },
-  //     );
-  //     if (response.statusCode != 200) {
-  //       print('Failed to store session data');
-  //     }
-  //   } catch (e) {
-  //     print('Error storing session: $e');
-  //   }
-  // }
-
+//css atau ui
   @override
   Widget build(BuildContext context) {
+    //container dari semua child ui
     return Scaffold(
       backgroundColor: const Color(0xFF212529),
       body: RawKeyboardListener(
+        //untuk menerima key enter ketika user ingin login
         focusNode: _focusNode,
         onKey: (RawKeyEvent event) {
           if (event is RawKeyDownEvent &&
@@ -135,6 +119,7 @@ class _WelcomePageState extends State<WelcomePage> {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
+                //judul
                 const Text(
                   'Selamat Datang di Agus Plastik',
                   style: TextStyle(
@@ -144,6 +129,7 @@ class _WelcomePageState extends State<WelcomePage> {
                   ),
                 ),
                 const SizedBox(height: 20),
+                //textfield
                 TextField(
                   style: const TextStyle(color: Colors.yellow),
                   controller: _ipController,

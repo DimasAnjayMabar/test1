@@ -10,25 +10,24 @@ class Exitpopup {
     return showDialog(
       context: context,
       builder: (BuildContext context) {
-        final FocusNode focusNode = FocusNode(); // Focus node for dialog interaction
-
-        // Wrapping the dialog inside RawKeyboardListener for listening keyboard events
+        //sistem akan mendengarkan key dari inputan keyboard
+        final FocusNode focusNode = FocusNode();
         return RawKeyboardListener(
           focusNode: focusNode,
           onKey: (RawKeyEvent event) {
             if (event is RawKeyDownEvent) {
-              // Close dialog on Escape
+              //jika escape maka destroy popup ini
               if (event.logicalKey == LogicalKeyboardKey.escape) {
                 Navigator.of(context).pop();
               }
-              // Confirm exit and log out on Enter
+              //enter maka logout
               else if (event.logicalKey == LogicalKeyboardKey.enter) {
                 _handleLogout(context);
               }
             }
           },
           child: Focus(
-            autofocus: true, // Ensure focus is granted immediately
+            autofocus: true,
             child: AlertDialog(
               title: const Text(
                 "Confirm Exit",
@@ -36,6 +35,7 @@ class Exitpopup {
               ),
               content: const Text("Are you sure you want to exit?"),
               actions: <Widget>[
+                //sama halnya dengan focus node, tetapi berbentuk ui
                 TextButton(
                   child: const Text(
                     "Cancel",
@@ -62,40 +62,40 @@ class Exitpopup {
     );
   }
 
+  //fungsi untuk logout
   static Future<void> _handleLogout(BuildContext context) async {
+    //inisialisasi 
     const storage = FlutterSecureStorage();
 
     try {
-      // Retrieve user credentials
+      //memanggil user secure storage untuk terakhir kali sebagai penghubung antara aplikasi dan backend
       User? user = await User.getUserCredentials();
       if (user == null) {
         throw Exception("Invalid user credentials or missing server IP.");
       }
 
+      //koneksi ke backend menggunakan server ip
       final serverIp = user.serverIp;
       final response = await http.post(Uri.parse('http://$serverIp:3000/logout'));
 
+      //setelah terkoneksi ke backend, menghapuskan isi dari secure storage
       if (response.statusCode == 200) {
-        // Delete saved credentials
         await storage.delete(key: 'username');
         await storage.delete(key: 'password');
         await storage.delete(key: 'database');
         await storage.delete(key: 'servername');
 
-        // Successfully logged out, navigate to WelcomePage
-        Navigator.of(context).pop(); // Close the dialog
+        Navigator.of(context).pop();
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(builder: (context) => const WelcomePage()),
         );
       } else {
-        // Show error message if logout fails
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text("Failed to log out. Please try again.")),
         );
       }
     } catch (e) {
-      // Handle connection errors or invalid credentials
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text("Error: Unable to log out. ${e.toString()}")),
       );

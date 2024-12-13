@@ -1,14 +1,27 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:test1/beans/b_tree_class.dart';
 import 'package:test1/beans/user.dart';
 import '../popups/views/piutang_view.dart';
 
-class Buildpiutang extends StatelessWidget {
+//constructor
+class Buildpiutang extends StatefulWidget {
   const Buildpiutang({super.key});
 
-  // Fetch products from the backend API using IP from the user object
-  Future<List<dynamic>> fetchProducts() async {
+  @override
+  _BuildPiutangState createState() => _BuildPiutangState();
+}
+
+//state untuk piutang
+class _BuildPiutangState extends State<Buildpiutang> {
+  //inisialisasi fungsi search
+  final TextEditingController _searchController = TextEditingController();
+  List<dynamic> _filteredReceivables = [];
+  final BTree _receivableBTree = BTree(3); // Degree of the tree
+
+  //fetch transaksi yang memiliki piutang = true
+  Future<void> fetchReceivables() async {
     User? user = await User.getUserCredentials();
 
     if (user == null) {
@@ -17,8 +30,9 @@ class Buildpiutang extends StatelessWidget {
 
     final serverIp = user.serverIp;
 
+    //post identitas database untuk meminta data / fetching
     final response = await http.post(
-      Uri.parse('http://$serverIp:3000/transactions'),
+      Uri.parse('http://$serverIp:3000/receivables'),
       headers: {
         'Content-Type': 'application/json',
       },
@@ -30,53 +44,90 @@ class Buildpiutang extends StatelessWidget {
       }),
     );
 
+    //jika fetch sukses
     if (response.statusCode == 200) {
-      return json.decode(response.body)['transactions'];
+      final receivables = json.decode(response.body)['receivables'];
+      setState(() {
+        _filteredReceivables = receivables;//kondisi jika tidak ada filter
+
+        //pass semua list piutang ke b tree untuk di filter
+        for (var receivable in receivables) {
+          final lowerCaseName = receivable['nama_customer'].toLowerCase();
+          _receivableBTree.insert(lowerCaseName, receivable);
+        }
+      });
     } else {
       throw Exception('Failed to load products');
     }
   }
 
+  //fungsi untuk memanggil fungsi search b tree
+  void _searchReceivable(String query) {
+    final lowerCaseQuery = query.toLowerCase();
+    final matchedTransactions = _receivableBTree.searchBySubstring(lowerCaseQuery);
+    setState(() {
+      _filteredReceivables = matchedTransactions.toSet().toList();
+    });
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    fetchReceivables();
+  }
+
+//css atau ui
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.grey[850],
-      body: FutureBuilder<List<dynamic>>(
-        future: fetchProducts(),
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return const Center(child: CircularProgressIndicator());
-          } else if (snapshot.hasError) {
-            return Center(child: Text('Error: ${snapshot.error}'));
-          } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-            return const Center(child: Text('No receivables available'));
-          }
-
-          final receivables = snapshot.data!;
-
-          return SingleChildScrollView(
-            padding: const EdgeInsets.all(16),
-            child: Column(
-              children: receivables.map((receivable) {
-                final transactionId = receivable['id_transaksi'];
-                if (transactionId == null) {
-                  print('Error: Product ID is null');
-                  return const SizedBox.shrink();
-                }
-
-                return ProductCard(
-                  id: transactionId, // Pass the product ID correctly
-                  name: receivable['nama_customer'],
-                  price: receivable['total_harga'].toString(),
-                );
-              }).toList(),
+      body: Column(
+        children: [
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: TextField(
+              controller: _searchController,
+              onChanged: _searchReceivable,
+              decoration: InputDecoration(
+                labelText: 'Cari Transaksi',
+                filled: true,
+                fillColor: Colors.grey[700],
+                prefixIcon: const Icon(Icons.search, color: Colors.white),
+                labelStyle: const TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.bold,
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderSide: const BorderSide(color: Colors.white, width: 2),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                enabledBorder: OutlineInputBorder(
+                  borderSide: const BorderSide(color: Colors.white, width: 1),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+              ),
             ),
-          );
-        },
+          ),
+          Expanded(
+            child: _filteredReceivables.isEmpty
+                ? const Center(child: Text('No products available'))
+                : ListView.builder(
+                    itemCount: _filteredReceivables.length,
+                    itemBuilder: (context, index) {
+                      final product = _filteredReceivables[index];
+                      return ProductCard(
+                        id: product['id_transaksi'],
+                        name: product['nama_customer'],
+                        price: product['total_harga'].toString(),
+                      );
+                    },
+                  ),
+          ),
+        ],
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
-          // Action for FAB
+          
         },
         backgroundColor: Colors.orange,
         child: const Icon(Icons.add),

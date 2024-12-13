@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:test1/list_loader/BuildCustomer.dart';
 import 'package:test1/list_loader/BuildDistributor.dart';
 import 'package:test1/list_loader/BuildGudang.dart';
 import 'package:test1/list_loader/BuildHutang.dart';
@@ -25,18 +26,16 @@ class HomepageState extends State<Homepage>
   @override
   void initState() {
     super.initState();
-    // Initialize TabController for managing tabs
-    _tabController = TabController(length: 5, vsync: this);
+    _tabController = TabController(length: 6, vsync: this);
     _tabController?.addListener(_onTabChanged);
   }
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    _focusNode.requestFocus(); // Request focus to enable key listener
+    _focusNode.requestFocus(); 
   }
 
-  // Update the selected index based on tab change
   void _onTabChanged() {
     setState(() {
       _selectedIndex = _tabController!.index;
@@ -75,13 +74,14 @@ class HomepageState extends State<Homepage>
               if (event is RawKeyDownEvent &&
                   event.logicalKey == LogicalKeyboardKey.escape) {
                 Exitpopup.showExitPopup(
-                    context); // Trigger popup on Escape key press
+                    context);
               }
             },
             child: IconButton(
               icon: const Icon(Icons.exit_to_app),
               color: Colors.grey,
               onPressed: () {
+                //memunculkan popup logout
                 Exitpopup.showExitPopup(context);
               },
             ),
@@ -89,14 +89,16 @@ class HomepageState extends State<Homepage>
           const SizedBox(width: 8),
         ],
       ),
+      //tab bar untuk memilih menu
       body: TabBarView(
         controller: _tabController,
         children: [
-          _selectedIndex == 0 ? Buildgudang() : _buildTab(0, ""),
-          _selectedIndex == 1 ? Buildtransaksi() : _buildTab(1, ""),
-          _selectedIndex == 2 ? const Buildhutang() : _buildTab(2, ""),
-          _selectedIndex == 3 ? const Buildpiutang() : _buildTab(3, ""),
-          _selectedIndex == 4 ? const Builddistributor() : _buildTab(4, "")
+          _selectedIndex == 0 ? const Buildgudang() : _buildTab(0, ""),//mengarahkan menu ke loader build gudang untuk memunculkan list produk
+          _selectedIndex == 1 ? const Buildtransaksi() : _buildTab(1, ""),//mengarahkan ke loader transaksi
+          _selectedIndex == 2 ? const Buildhutang() : _buildTab(2, ""),//mengarahkan ke loader hutang
+          _selectedIndex == 3 ? const Buildpiutang() : _buildTab(3, ""),//mengarahkan ke loader piutang
+          _selectedIndex == 4 ? const Builddistributor() : _buildTab(4, ""),//mengarahkan menu ke loader build distibutor untuk memunculkan list distributor
+          _selectedIndex == 5 ? const Buildcustomer() : _buildTab(5, "")//mengarahkan ke loader customer
         ],
       ),
       bottomNavigationBar: BottomNavigationBar(
@@ -136,6 +138,11 @@ class HomepageState extends State<Homepage>
             icon: Icon(Icons.local_shipping,
                 color: _selectedIndex == 4 ? Colors.yellow : Colors.grey[500]),
             label: 'Distributor',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.person,
+                color: _selectedIndex == 5 ? Colors.yellow : Colors.grey[500]),
+            label: 'Customer',
           ),
         ],
       ),

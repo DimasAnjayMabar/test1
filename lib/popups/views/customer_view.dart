@@ -16,8 +16,8 @@ class ProductCard extends StatelessWidget {
     required this.id,
   });
 
-  //fetch detail distributor ke dalam popup
-  Future<Map<String, dynamic>> fetchDistributorDetails(int distributorId) async {
+  //fetch data detail customer ke dalam popup
+  Future<Map<String, dynamic>> fetchCustomerDetails(int customerId) async {
     try {
       final user = await User.getUserCredentials();
       if (user == null) {
@@ -26,55 +26,56 @@ class ProductCard extends StatelessWidget {
       final serverIp = user.serverIp;
 
       final response = await http.post(
-        Uri.parse('http://$serverIp:3000/distributor-details'),
+        Uri.parse('http://$serverIp:3000/customer-details'),
         headers: {'Content-Type': 'application/json'},
         body: json.encode({
           'servername': serverIp,
           'username': user.username,
           'password': user.password,
           'database': user.database,
-          'distributor_id': distributorId,
+          'customer_id': customerId,
         }),
       );
-      
+
       //jika terkoneksi
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
         if (data == null || data['status'] != 'success') {
-          throw Exception('Failed to load distributor details: ${data['message']}');
+          throw Exception('Failed to load customer details: ${data['message']}');
         }
 
-        if (data['distributors'] is Map<String, dynamic>) {
-          return data['distributors'];
+        if (data['customers'] is Map<String, dynamic>) {
+          return data['customers'];
         } else {
           throw Exception('Invalid data details format');
         }
       } else {
-        throw Exception('Failed to load distributors details: ${response.statusCode}');
+        throw Exception('Failed to load customer details: ${response.statusCode}');
       }
     } catch (e) {
-      print('Error fetching distributor details: $e');
-      throw Exception('Error fetching deistributor details');
+      print('Error fetching customer details: $e');
+      throw Exception('Error fetching customer details');
     }
   }
 
-  //memasukkan hasil fetch ke dalam popup
-  Future<void> _showDistributorDetails(BuildContext context) async {
+  //fungsi untuk fetch data ke dalam popup
+  Future<void> _showCustomerDetails(BuildContext context) async {
     try {
-      final productDetails = await fetchDistributorDetails(id);
+      final customerDetails = await fetchCustomerDetails(id);
 
       showDialog(
         context: context,
         builder: (BuildContext context) {
           return AlertDialog(
-            title: Text(productDetails['nama_distributor'],
+            title: Text(customerDetails['nama_customer'],
                 style: const TextStyle(fontWeight: FontWeight.bold)),
             content: SingleChildScrollView(
               child: ListBody(
                 children: <Widget>[
-                  Text('No Telp: ${productDetails['no_telp_distributor']}'),
-                  Text('Email: ${productDetails['email_distributor']}'),
-                  Text('Ecommerce: ${productDetails['link_ecommerce']}'),
+                  Text('No Telp: ${customerDetails['no_telp_customer']}'),
+                  Text('Email: ${customerDetails['email_customer']}'),
+                  Text('NIK: ${customerDetails['nik']}'),
+                  Text('Alamat : ${customerDetails['alamat']}')
                 ],
               ),
             ),
@@ -102,16 +103,16 @@ class ProductCard extends StatelessWidget {
         },
       );
     } catch (e) {
-      print('Error fetching product details: $e');
+      print('Error fetching customer details: $e');
     }
   }
 
-//gesture detection agar kartu bisa ditekan
+//fungsi gesture detection agar kartu bisa ditekan
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: () async {
-        await _showDistributorDetails(context);
+        await _showCustomerDetails(context);
       },
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 300),

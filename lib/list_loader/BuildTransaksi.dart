@@ -3,9 +3,12 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:test1/beans/b_tree_class.dart';
 import 'package:test1/beans/user.dart';
+import 'package:test1/popups/add/add_transaksi.dart';
 import '../popups/views/transaksi_view.dart';
 
 class Buildtransaksi extends StatefulWidget {
+  const Buildtransaksi({super.key});
+
   @override
   _BuildTransaksiState createState() => _BuildTransaksiState();
 }
@@ -16,7 +19,7 @@ class _BuildTransaksiState extends State<Buildtransaksi> {
   final BTree _transactionBTree = BTree(3); // Degree of the tree
 
   // Fetch products from the backend API and insert them into the B-Tree
-  Future<void> fetchProducts() async {
+  Future<void> fetchTransactions() async {
     User? user = await User.getUserCredentials();
 
     if (user == null) {
@@ -55,7 +58,7 @@ class _BuildTransaksiState extends State<Buildtransaksi> {
   }
 
   // Search products based on user input using the B-Tree
-  void _searchProducts(String query) {
+  void _searchTransactions(String query) {
     final lowerCaseQuery = query.toLowerCase();
     final matchedTransactions = _transactionBTree.searchBySubstring(lowerCaseQuery); // Use substring search
     setState(() {
@@ -66,7 +69,7 @@ class _BuildTransaksiState extends State<Buildtransaksi> {
   @override
   void initState() {
     super.initState();
-    fetchProducts();
+    fetchTransactions();
   }
 
   @override
@@ -79,9 +82,9 @@ class _BuildTransaksiState extends State<Buildtransaksi> {
             padding: const EdgeInsets.all(8.0),
             child: TextField(
               controller: _searchController,
-              onChanged: _searchProducts,
+              onChanged: _searchTransactions,
               decoration: InputDecoration(
-                labelText: 'Search Transactions',
+                labelText: 'Cari Transaksi',
                 filled: true,
                 fillColor: Colors.grey[700],
                 prefixIcon: const Icon(Icons.search, color: Colors.white),
@@ -90,11 +93,11 @@ class _BuildTransaksiState extends State<Buildtransaksi> {
                   fontWeight: FontWeight.bold,
                 ),
                 focusedBorder: OutlineInputBorder(
-                  borderSide: BorderSide(color: Colors.white, width: 2),
+                  borderSide: const BorderSide(color: Colors.white, width: 2),
                   borderRadius: BorderRadius.circular(8),
                 ),
                 enabledBorder: OutlineInputBorder(
-                  borderSide: BorderSide(color: Colors.white, width: 1),
+                  borderSide: const BorderSide(color: Colors.white, width: 1),
                   borderRadius: BorderRadius.circular(8),
                 ),
               ),
@@ -119,7 +122,12 @@ class _BuildTransaksiState extends State<Buildtransaksi> {
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
-          
+          showDialog(
+            context: context,
+            builder: (BuildContext context) {
+              return const AddTransaksiPopup(); // This will show as a dialog instead of a new page
+            },
+          );
         },
         backgroundColor: Colors.orange,
         child: const Icon(Icons.add),

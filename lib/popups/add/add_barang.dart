@@ -11,6 +11,7 @@ class AddProductPopup extends StatefulWidget {
 }
 
 class _AddProductPopupState extends State<AddProductPopup> {
+  //inisialisasi
   final _formKey = GlobalKey<FormState>();
 
   String? namaBarang;
@@ -22,7 +23,7 @@ class _AddProductPopupState extends State<AddProductPopup> {
   String? selectedDistributorId;
   List<Map<String, String>> distributors = []; // List to store distributor data
 
-  // Function to calculate the selling price based on profit percentage
+  //harga jual menambah otomatis sesuai persenan yang dimasukkan
   void _calculateHargaJual() {
     if (hargaBeli != null) {
       setState(() {
@@ -32,7 +33,7 @@ class _AddProductPopupState extends State<AddProductPopup> {
     }
   }
 
-  // Fetch distributors from the database
+  //fetch distributor agar bisa memilih distributor lewat dropdown
   Future<void> _fetchDistributors() async {
     try {
       final user = await User.getUserCredentials();
@@ -55,7 +56,6 @@ class _AddProductPopupState extends State<AddProductPopup> {
         setState(() {
           distributors = List<Map<String, String>>.from(
             data['distributors'].map((distributor) {
-              // Ensure that the 'id_distributor' and 'nama_distributor' are cast to strings
               return {
                 'id_distributor': distributor['id_distributor'].toString(),
                 'nama_distributor': distributor['nama_distributor'].toString(),
@@ -73,8 +73,7 @@ class _AddProductPopupState extends State<AddProductPopup> {
     }
   }
 
-
-  // Function to send the data to the server
+  //fungsi untuk submit data produk baru
   Future<void> _submitForm() async {
     if (_formKey.currentState!.validate()) {
       _formKey.currentState!.save();
@@ -96,7 +95,7 @@ class _AddProductPopupState extends State<AddProductPopup> {
             'harga_jual': hargaJual,
             'stok': stok,
             'hutang': hutang,
-            'id_distributor': int.tryParse(selectedDistributorId ?? ''), // Convert to int
+            'id_distributor': int.tryParse(selectedDistributorId ?? ''),
           }),
         );
 
@@ -105,7 +104,7 @@ class _AddProductPopupState extends State<AddProductPopup> {
             const SnackBar(content: Text('Product added successfully!')),
           );
           Navigator.of(context)
-              .pop(true); // Close the dialog and return success
+              .pop(true); 
         } else {
           throw Exception('Failed to add product: ${response.body}');
         }
@@ -120,9 +119,10 @@ class _AddProductPopupState extends State<AddProductPopup> {
   @override
   void initState() {
     super.initState();
-    _fetchDistributors(); // Fetch distributors when the form loads
+    _fetchDistributors();
   }
 
+//css atau ui
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
@@ -139,8 +139,9 @@ class _AddProductPopupState extends State<AddProductPopup> {
               TextFormField(
                 decoration: const InputDecoration(labelText: 'Nama Barang'),
                 validator: (value) {
-                  if (value == null || value.isEmpty)
+                  if (value == null || value.isEmpty) {
                     return 'Masukkan nama produk';
+                  }
                   return null;
                 },
                 onSaved: (value) => namaBarang = value,
@@ -149,13 +150,15 @@ class _AddProductPopupState extends State<AddProductPopup> {
                 decoration: const InputDecoration(labelText: 'Harga Beli'),
                 keyboardType: TextInputType.number,
                 validator: (value) {
-                  if (value == null || int.tryParse(value) == null)
+                  if (value == null || int.tryParse(value) == null) {
                     return 'Masukkan harga dengan benar';
+                  }
                   return null;
                 },
                 onChanged: (value) {
                   setState(() {
                     hargaBeli = int.tryParse(value);
+                    //kalkulasi harga jual ototmatis
                     _calculateHargaJual();
                   });
                 },
@@ -165,8 +168,9 @@ class _AddProductPopupState extends State<AddProductPopup> {
                     const InputDecoration(labelText: 'Persen Profit (%)'),
                 keyboardType: TextInputType.number,
                 validator: (value) {
-                  if (value == null || double.tryParse(value) == null)
+                  if (value == null || double.tryParse(value) == null) {
                     return 'Masukkan hanya angka biasa (sudah dalam bentuk persen)';
+                  }
                   return null;
                 },
                 onChanged: (value) {
@@ -180,30 +184,31 @@ class _AddProductPopupState extends State<AddProductPopup> {
                 decoration: const InputDecoration(labelText: 'Stok'),
                 keyboardType: TextInputType.number,
                 validator: (value) {
-                  if (value == null || int.tryParse(value) == null)
+                  if (value == null || int.tryParse(value) == null) {
                     return 'Masukkan stok barang';
+                  }
                   return null;
                 },
                 onSaved: (value) => stok = int.parse(value!),
               ),
+              //drop down untuk memilih distributor
               DropdownButtonFormField<String>(
                 decoration: const InputDecoration(labelText: 'Distributor'),
                 items: distributors
                     .map((distributor) {
-                      // Ensure 'id_distributor' is treated as a string
                       return DropdownMenuItem<String>(
-                        value: distributor['id_distributor']?.toString(), // Convert to String
+                        value: distributor['id_distributor']?.toString(),
                         child: Text(distributor['nama_distributor']!),
                       );
                     })
                     .toList(),
                 onChanged: (value) {
-                  // Ensure value is a String
                   setState(() => selectedDistributorId = value);
                 },
                 validator: (value) {
-                  if (value == null || value.isEmpty)
+                  if (value == null || value.isEmpty) {
                     return 'Pilih distributor';
+                  }
                   return null;
                 },
               ),
@@ -227,10 +232,11 @@ class _AddProductPopupState extends State<AddProductPopup> {
       ),
       actions: [
         TextButton(
-          onPressed: () => Navigator.of(context).pop(false), // Cancel action
+          onPressed: () => Navigator.of(context).pop(false),
           child: const Text('Kembali'),
         ),
         ElevatedButton(
+          //submit produk baru
           onPressed: _submitForm,
           child: const Text('Tambah'),
         ),

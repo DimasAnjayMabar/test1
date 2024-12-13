@@ -4,24 +4,24 @@ import 'package:http/http.dart' as http;
 import 'package:test1/beans/b_tree_class.dart';
 import 'package:test1/beans/user.dart';
 import 'package:test1/popups/add/add_barang.dart';
-import '../popups/views/product_view.dart';
+import '../popups/views/customer_view.dart';
 
-class Buildgudang extends StatefulWidget {
-  const Buildgudang({super.key});
+//constructor
+class Buildcustomer extends StatefulWidget {
+  const Buildcustomer({super.key});
 
   @override
-  _BuildgudangState createState() => _BuildgudangState();
+  _BuildCustomerState createState() => _BuildCustomerState();
 }
 
-class _BuildgudangState extends State<Buildgudang> {
-  //inisialisasi
+class _BuildCustomerState extends State<Buildcustomer> {
+  //inisialisasi fungsi search
   final TextEditingController _searchController = TextEditingController();
-  List<dynamic> _filteredProducts = [];
-  final BTree _productBTree = BTree(3); //degree b tree
+  List<dynamic> _filteredCustomers = [];
+  final BTree _customerBTree = BTree(3); 
 
-  //fetch produk ke dalam list
-  Future<void> fetchProducts() async {
-    //memanggil user secure storage untuk post identitas database
+  //fetch customer
+  Future<void> fetchCustomer() async {
     User? user = await User.getUserCredentials();
 
     if (user == null) {
@@ -30,9 +30,8 @@ class _BuildgudangState extends State<Buildgudang> {
 
     final serverIp = user.serverIp;
 
-    //fetch produk dari backend ke database, mengambil identitas database dari secure storage
     final response = await http.post(
-      Uri.parse('http://$serverIp:3000/products'),
+      Uri.parse('http://$serverIp:3000/customers'),
       headers: {
         'Content-Type': 'application/json',
       },
@@ -45,35 +44,34 @@ class _BuildgudangState extends State<Buildgudang> {
     );
 
     if (response.statusCode == 200) {
-      final products = json.decode(response.body)['products'];
+      final customers = json.decode(response.body)['customers'];
       setState(() {
-        _filteredProducts = products;
+        _filteredCustomers = customers; //inisialisasi filter dengan data yang ada
 
-        //memasukkan produk dalam b tree
-        for (var product in products) {
-          final lowerCaseName = product['nama_barang'].toLowerCase();
-          _productBTree.insert(lowerCaseName, product);
+        //memasukkan data yang terkena filter ke dalam b tree
+        for (var customer in customers) {
+          final lowerCaseName = customer['nama_customer'].toLowerCase();
+          _customerBTree.insert(lowerCaseName, customer);
         }
       });
     } else {
-      throw Exception('Failed to load products');
+      throw Exception('Failed to load customers');
     }
   }
 
-  //penggunaan b tree untuk search function
-  void _searchProducts(String query) {
+  //fungsi untuk memanggil b tree ke dalam fungsi search dalam aplikasi
+  void _searchCustomers(String query) {
     final lowerCaseQuery = query.toLowerCase();
-    final matchedProducts = _productBTree.searchBySubstring(lowerCaseQuery);
+    final matchedCustomers = _customerBTree.searchBySubstring(lowerCaseQuery);
     setState(() {
-      //akan menyimpan list yang sudah di filter
-      _filteredProducts = matchedProducts.toSet().toList();
+      _filteredCustomers = matchedCustomers.toSet().toList();
     });
   }
 
   @override
   void initState() {
     super.initState();
-    fetchProducts();
+    fetchCustomer();
   }
 
 //css atau ui
@@ -87,9 +85,9 @@ class _BuildgudangState extends State<Buildgudang> {
             padding: const EdgeInsets.all(8.0),
             child: TextField(
               controller: _searchController,
-              onChanged: _searchProducts,
+              onChanged: _searchCustomers,
               decoration: InputDecoration(
-                labelText: 'Cari Produk',
+                labelText: 'Cari Customer',
                 filled: true,
                 fillColor: Colors.grey[700],
                 prefixIcon: const Icon(Icons.search, color: Colors.white),
@@ -108,19 +106,17 @@ class _BuildgudangState extends State<Buildgudang> {
               ),
             ),
           ),
-          //menampilkan card list barang
           Expanded(
-            //cek jika filtered product kosong
-            child: _filteredProducts.isEmpty
-                ? const Center(child: Text('No products available'))
+            child: _filteredCustomers.isEmpty
+                ? const Center(child: Text('No customer available'))
                 : ListView.builder(
-                    itemCount: _filteredProducts.length,
+                    itemCount: _filteredCustomers.length,
                     itemBuilder: (context, index) {
-                      final product = _filteredProducts[index];
+                      final product = _filteredCustomers[index];
                       return ProductCard(
-                        id: product['id_barang'],
-                        name: product['nama_barang'],
-                        price: product['harga_jual'].toString(),
+                        id: product['id_customer'],
+                        name: product['nama_customer'],
+                        price: product['no_telp_customer'].toString(),
                       );
                     },
                   ),
@@ -128,7 +124,6 @@ class _BuildgudangState extends State<Buildgudang> {
         ],
       ),
       floatingActionButton: FloatingActionButton(
-        //mentrigger popup add barang
         onPressed: () {
           showDialog(
             context: context,

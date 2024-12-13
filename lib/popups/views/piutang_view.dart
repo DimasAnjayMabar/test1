@@ -4,7 +4,7 @@ import 'package:http/http.dart' as http;
 import 'package:test1/beans/user.dart';
 import 'package:intl/intl.dart';
 
-
+//constructor
 class ProductCard extends StatelessWidget {
   final String name;
   final String price;
@@ -17,8 +17,8 @@ class ProductCard extends StatelessWidget {
     required this.id,
   });
 
-  // Function to fetch the product details by product ID
-  Future<Map<String, dynamic>> fetchProductDetails(int transactionId) async {
+  //fetch detail transaksi 
+  Future<Map<String, dynamic>> fetchReceivableDetails(int transactionId) async {
     try {
       final user = await User.getUserCredentials();
       if (user == null) {
@@ -38,6 +38,7 @@ class ProductCard extends StatelessWidget {
         }),
       );
 
+      //jika fetch sukses
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
         if (data == null || data['status'] != 'success') {
@@ -58,10 +59,10 @@ class ProductCard extends StatelessWidget {
     }
   }
 
-  // Function to show the product details in a dialog
-  Future<void> _showProductDetails(BuildContext context) async {
+  //fungsi untuk memunculkan detail piutang ke dalam popup
+  Future<void> _showReceivableDetails(BuildContext context) async {
     try {
-      final productDetails = await fetchProductDetails(id);
+      final productDetails = await fetchReceivableDetails(id);
 
       showDialog(
         context: context,
@@ -125,11 +126,12 @@ class ProductCard extends StatelessWidget {
     }
   }
 
+//fungsi untuk gesture detection agar kartu bisa di tekan
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: () async {
-        await _showProductDetails(context);
+        await _showReceivableDetails(context);
       },
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 300),

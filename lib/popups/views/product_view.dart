@@ -6,6 +6,7 @@ import 'package:intl/intl.dart';
 
 
 class ProductCard extends StatelessWidget {
+  //inisialisasi
   final String name;
   final String price;
   final int id;
@@ -17,8 +18,9 @@ class ProductCard extends StatelessWidget {
     required this.id,
   });
 
-  // Function to fetch the product details by product ID
+
   Future<Map<String, dynamic>> fetchProductDetails(int productId) async {
+    //mengambil data lengkap dari barang
     try {
       final user = await User.getUserCredentials();
       if (user == null) {
@@ -34,6 +36,7 @@ class ProductCard extends StatelessWidget {
           'username': user.username,
           'password': user.password,
           'database': user.database,
+          //sesuai dengan id kartu yang ditekan
           'product_id': productId,
         }),
       );
@@ -58,7 +61,7 @@ class ProductCard extends StatelessWidget {
     }
   }
 
-  // Function to show the product details in a dialog
+  //fetch detail produk
   Future<void> _showProductDetails(BuildContext context) async {
     try {
       final productDetails = await fetchProductDetails(id);
@@ -79,7 +82,7 @@ class ProductCard extends StatelessWidget {
                   Text('Barcode: ${productDetails['barcode']}'),
                   Text('Hutang: ${productDetails['hutang'] ? "Ya" : "Tidak"}'),
                   const SizedBox(height: 10),
-                  const Text('Distrbutor:',
+                  const Text('Distributor:',
                       style: TextStyle(fontWeight: FontWeight.bold)),
                   Text('Nama: ${productDetails['nama_distributor']}'),
                   Text('No Telp: ${productDetails['no_telp_distributor']}'),
@@ -122,6 +125,7 @@ class ProductCard extends StatelessWidget {
     }
   }
 
+//gesture detection agar kartu di menu bisa ditekan
   @override
   Widget build(BuildContext context) {
     return GestureDetector(

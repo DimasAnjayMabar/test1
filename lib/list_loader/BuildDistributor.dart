@@ -1,14 +1,27 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:test1/beans/b_tree_class.dart';
 import 'package:test1/beans/user.dart';
+import 'package:test1/popups/add/add_barang.dart';
 import '../popups/views/distributor_view.dart';
 
-class Builddistributor extends StatelessWidget {
+//constructor
+class Builddistributor extends StatefulWidget {
   const Builddistributor({super.key});
 
-  // Fetch products from the backend API using IP from the user object
-  Future<List<dynamic>> fetchProducts() async {
+  @override
+  _BuildDistributorState createState() => _BuildDistributorState();
+}
+
+class _BuildDistributorState extends State<Builddistributor> {
+  //inisialisasi fungsi search
+  final TextEditingController _searchController = TextEditingController();
+  List<dynamic> _filteredDistributors = [];
+  final BTree _distributorBTree = BTree(3);
+
+  //fetch data distributor 
+  Future<void> fetchDistributors() async {
     User? user = await User.getUserCredentials();
 
     if (user == null) {
@@ -30,53 +43,94 @@ class Builddistributor extends StatelessWidget {
       }),
     );
 
+    //jika terkoneksi
     if (response.statusCode == 200) {
-      return json.decode(response.body)['distributors'];
+      final distributors = json.decode(response.body)['distributors'];
+      setState(() {
+        _filteredDistributors = distributors;
+
+        for (var distributor in distributors) {
+          final lowerCaseName = distributor['nama_distributor'].toLowerCase();
+          _distributorBTree.insert(lowerCaseName, distributor);
+        }
+      });
     } else {
       throw Exception('Failed to load distributors');
     }
   }
 
+  //fungsi untuk memanggil b tree ke dalam fungsi search
+  void _searchDistributor(String query) {
+    final lowerCaseQuery = query.toLowerCase();
+    final matchedProducts = _distributorBTree.searchBySubstring(lowerCaseQuery);
+    setState(() {
+      _filteredDistributors = matchedProducts.toSet().toList();
+    });
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    fetchDistributors();
+  }
+
+//css atau ui
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.grey[850],
-      body: FutureBuilder<List<dynamic>>(
-        future: fetchProducts(),
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return const Center(child: CircularProgressIndicator());
-          } else if (snapshot.hasError) {
-            return Center(child: Text('Error: ${snapshot.error}'));
-          } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-            return const Center(child: Text('No distributors available'));
-          }
-
-          final distributors = snapshot.data!;
-
-          return SingleChildScrollView(
-            padding: const EdgeInsets.all(16),
-            child: Column(
-              children: distributors.map((distributor) {
-                final distributorId = distributor['id_distributor'];
-                if (distributorId == null) {
-                  print('Error: Product ID is null');
-                  return const SizedBox.shrink();
-                }
-
-                return ProductCard(
-                  id: distributorId,
-                  name: distributor['nama_distributor'],
-                  price: distributor['no_telp_distributor'].toString(),
-                );
-              }).toList(),
+      body: Column(
+        children: [
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: TextField(
+              controller: _searchController,
+              onChanged: _searchDistributor,
+              decoration: InputDecoration(
+                labelText: 'Cari Distributor',
+                filled: true,
+                fillColor: Colors.grey[700],
+                prefixIcon: const Icon(Icons.search, color: Colors.white),
+                labelStyle: const TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.bold,
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderSide: const BorderSide(color: Colors.white, width: 2),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                enabledBorder: OutlineInputBorder(
+                  borderSide: const BorderSide(color: Colors.white, width: 1),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+              ),
             ),
-          );
-        },
+          ),
+          Expanded(
+            child: _filteredDistributors.isEmpty
+                ? const Center(child: Text('No distributor available'))
+                : ListView.builder(
+                    itemCount: _filteredDistributors.length,
+                    itemBuilder: (context, index) {
+                      final product = _filteredDistributors[index];
+                      return ProductCard(
+                        id: product['id_distributor'],
+                        name: product['nama_distributor'],
+                        price: product['no_telp_distributor'].toString(),
+                      );
+                    },
+                  ),
+          ),
+        ],
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
-          // Action for FAB
+          showDialog(
+            context: context,
+            builder: (BuildContext context) {
+              return const AddProductPopup(); // This will show as a dialog instead of a new page
+            },
+          );
         },
         backgroundColor: Colors.orange,
         child: const Icon(Icons.add),

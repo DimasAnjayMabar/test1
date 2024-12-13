@@ -4,7 +4,7 @@ import 'package:http/http.dart' as http;
 import 'package:test1/beans/user.dart';
 import 'package:intl/intl.dart';
 
-
+//constructor
 class ProductCard extends StatelessWidget {
   final String name;
   final String price;
@@ -17,8 +17,8 @@ class ProductCard extends StatelessWidget {
     required this.id,
   });
 
-  // Function to fetch the product details by product ID
-  Future<Map<String, dynamic>> fetchProductDetails(int productId) async {
+  //fetch detail produk yang memiliki hutang = true
+  Future<Map<String, dynamic>> fetchDebtDetails(int productId) async {
     try {
       final user = await User.getUserCredentials();
       if (user == null) {
@@ -38,30 +38,31 @@ class ProductCard extends StatelessWidget {
         }),
       );
 
+      //jika fetch sukses
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
         if (data == null || data['status'] != 'success') {
-          throw Exception('Failed to load product details: ${data['message']}');
+          throw Exception('Failed to load debt details: ${data['message']}');
         }
 
         if (data['products'] is Map<String, dynamic>) {
           return data['products'];
         } else {
-          throw Exception('Invalid product details format');
+          throw Exception('Invalid debt details format');
         }
       } else {
-        throw Exception('Failed to load product details: ${response.statusCode}');
+        throw Exception('Failed to load debt details: ${response.statusCode}');
       }
     } catch (e) {
-      print('Error fetching product details: $e');
-      throw Exception('Error fetching product details');
+      print('Error fetching debt details: $e');
+      throw Exception('Error fetching debt details');
     }
   }
 
-  // Function to show the product details in a dialog
-  Future<void> _showProductDetails(BuildContext context) async {
+  //fungsi untuk memunculkan detail produk ke dalam popup
+  Future<void> _showDebtDetails(BuildContext context) async {
     try {
-      final productDetails = await fetchProductDetails(id);
+      final productDetails = await fetchDebtDetails(id);
 
       showDialog(
         context: context,
@@ -122,11 +123,12 @@ class ProductCard extends StatelessWidget {
     }
   }
 
+//gesture detection untuk kartu yang ditekan
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: () async {
-        await _showProductDetails(context);
+        await _showDebtDetails(context);
       },
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 300),
@@ -147,7 +149,7 @@ class ProductCard extends StatelessWidget {
                   fontSize: 16,
                   fontWeight: FontWeight.bold,
                   color: Colors.white),
-              overflow: TextOverflow.ellipsis,
+                  overflow: TextOverflow.ellipsis,
             ),
             Text(
               price,

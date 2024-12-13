@@ -6,32 +6,6 @@ class BTree {
 
   BTree(this.degree);
 
-  // Search for products by prefix in the B-Tree
-  List<dynamic> searchByPrefix(String prefix) {
-    List<dynamic> results = [];
-    _searchByPrefix(root, prefix, results);
-    return results;
-  }
-
-  void _searchByPrefix(BTreeNode? node, String prefix, List<dynamic> results) {
-    if (node == null) return;
-
-    for (int i = 0; i < node.keys.length; i++) {
-      if (node.keys[i].startsWith(prefix)) {
-        results.add(node.products[i]);
-      }
-      if (!node.isLeaf) {
-        _searchByPrefix(node.children[i], prefix, results);
-      }
-    }
-
-    // Search in the last child if it's not a leaf
-    if (!node.isLeaf) {
-      _searchByPrefix(node.children[node.keys.length], prefix, results);
-    }
-  }
-
-  // **NEW FUNCTION**: Search for products by substring in the B-Tree
   List<dynamic> searchBySubstring(String substring) {
     List<dynamic> results = [];
     _searchBySubstring(root, substring, results);
