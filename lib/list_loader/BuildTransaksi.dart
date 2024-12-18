@@ -109,11 +109,11 @@ class _BuildTransaksiState extends State<Buildtransaksi> {
                 : ListView.builder(
                     itemCount: _filteredTransactions.length,
                     itemBuilder: (context, index) {
-                      final product = _filteredTransactions[index];
-                      return ProductCard(
-                        id: product['id_transaksi'],
-                        name: product['nama_customer'],
-                        price: product['total_harga'].toString(),
+                      final transaction = _filteredTransactions[index];
+                      return TransaksiView(
+                        id: transaction['id_transaksi'],
+                        name: transaction['nama_customer'],
+                        totalHarga: 'Rp ${transaction['total_harga']}',
                       );
                     },
                   ),

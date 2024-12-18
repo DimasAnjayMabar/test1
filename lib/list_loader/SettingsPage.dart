@@ -59,7 +59,7 @@ class _SettingspageState extends State<Settingspage> {
           child: Column(
             children: [
               // Only one product card here
-              ProductCard(name: 'Ubah Pin Administrator', price: '000000'),
+              ProductCard(name: 'Ubah Pin Administrator', price: '000000', id: null,),
             ],
           ),
         ),
@@ -72,7 +72,7 @@ class ProductCard extends StatefulWidget {
   final String name;
   final String price;
 
-  const ProductCard({super.key, required this.name, required this.price});
+  const ProductCard({super.key, required this.name, required this.price, required id});
 
   @override
   _ProductCardState createState() => _ProductCardState();
@@ -95,9 +95,6 @@ class _ProductCardState extends State<ProductCard> {
         });
       }
     });
-
-    // Action when card is clicked
-    print('Card tapped!');
   }
 
   @override

@@ -4,20 +4,30 @@ import 'package:http/http.dart' as http;
 import 'package:test1/beans/user.dart';
 
 //constructor
-class ProductCard extends StatelessWidget {
+class DistributorView extends StatefulWidget {
   final String name;
-  final String price;
+  final String noTelp;
   final int id;
+  final void Function()? onTap;
 
-  const ProductCard({
-    super.key,
-    required this.name,
-    required this.price,
-    required this.id,
-  });
+  const DistributorView(
+      {super.key,
+      required this.name,
+      required this.noTelp,
+      required this.id,
+      this.onTap});
+
+  @override
+  _DistributorViewState createState() => _DistributorViewState();
+}
+
+class _DistributorViewState extends State<DistributorView> {
+  bool _isPressed = false;
+  bool _isHovered = false;
 
   //fetch detail distributor ke dalam popup
-  Future<Map<String, dynamic>> fetchDistributorDetails(int distributorId) async {
+  Future<Map<String, dynamic>> fetchDistributorDetails(
+      int distributorId) async {
     try {
       final user = await User.getUserCredentials();
       if (user == null) {
@@ -36,12 +46,13 @@ class ProductCard extends StatelessWidget {
           'distributor_id': distributorId,
         }),
       );
-      
+
       //jika terkoneksi
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
         if (data == null || data['status'] != 'success') {
-          throw Exception('Failed to load distributor details: ${data['message']}');
+          throw Exception(
+              'Failed to load distributor details: ${data['message']}');
         }
 
         if (data['distributors'] is Map<String, dynamic>) {
@@ -50,7 +61,8 @@ class ProductCard extends StatelessWidget {
           throw Exception('Invalid data details format');
         }
       } else {
-        throw Exception('Failed to load distributors details: ${response.statusCode}');
+        throw Exception(
+            'Failed to load distributors details: ${response.statusCode}');
       }
     } catch (e) {
       print('Error fetching distributor details: $e');
@@ -59,9 +71,9 @@ class ProductCard extends StatelessWidget {
   }
 
   //memasukkan hasil fetch ke dalam popup
-  Future<void> _showDistributorDetails(BuildContext context) async {
+  Future<void> _showDistributorDetails(BuildContext context, distributorId) async {
     try {
-      final productDetails = await fetchDistributorDetails(id);
+      final productDetails = await fetchDistributorDetails(distributorId);
 
       showDialog(
         context: context,
@@ -79,22 +91,16 @@ class ProductCard extends StatelessWidget {
               ),
             ),
             actions: <Widget>[
-              TextButton(
-                onPressed: () {
-                  Navigator.of(context).pop();
-                },
+              ElevatedButton(
+                onPressed: () => Navigator.of(context).pop(false),
                 child: const Text('Kembali'),
               ),
-              TextButton(
-                onPressed: () {
-                  Navigator.of(context).pop();
-                },
+              ElevatedButton(
+                onPressed: () => Navigator.of(context).pop(false),
                 child: const Text('Edit'),
               ),
-              TextButton(
-                onPressed: () {
-                  Navigator.of(context).pop();
-                },
+              ElevatedButton(
+                onPressed: () => Navigator.of(context).pop(false),
                 child: const Text('Hapus'),
               ),
             ],
@@ -106,46 +112,104 @@ class ProductCard extends StatelessWidget {
     }
   }
 
-//gesture detection agar kartu bisa ditekan
+  //fungsi untuk gesture detection agar kartu bisa di tekan
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: () async {
-        await _showDistributorDetails(context);
+    return MouseRegion(
+      onEnter: (_) {
+        setState(() {
+          _isHovered = true;
+        });
       },
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 300),
-        margin: const EdgeInsets.symmetric(vertical: 8),
-        width: double.infinity,
-        height: 70,
-        padding: const EdgeInsets.symmetric(horizontal: 16),
-        decoration: BoxDecoration(
-          color: Colors.grey[900],
-          borderRadius: BorderRadius.circular(30),
-        ),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Text(
-              name,
-              style: const TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.white),
-              overflow: TextOverflow.ellipsis,
+      onExit: (_) {
+        setState(() {
+          _isHovered = false;
+        });
+      },
+      child: GestureDetector(
+        onTapDown: (_) {
+          setState(() {
+            _isPressed = true; // Trigger press state
+          });
+        },
+        onTapUp: (_) {
+          setState(() {
+            _isPressed = false; // Release press state
+          });
+        },
+        onTapCancel: () {
+          setState(() {
+            _isPressed = false; // Cancel the press state
+          });
+        },
+        onTap: widget.onTap ??
+            () async {
+              setState(() {
+                _isPressed = true;
+              });
+              await _showDistributorDetails(context, widget.id);
+              setState(() {
+                _isPressed = false;
+              });
+            },
+        child: AnimatedContainer(
+          duration: const Duration(
+              milliseconds: 200), // Duration for smooth color transition
+          margin: const EdgeInsets.symmetric(vertical: 8),
+          width: double.infinity,
+          height: 70,
+          padding: const EdgeInsets.symmetric(horizontal: 16),
+          decoration: BoxDecoration(
+            color: _getBackgroundColor(),
+            borderRadius: BorderRadius.circular(30),
+            boxShadow: [
+              if (_isHovered)
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.4),
+                  spreadRadius: 1,
+                  blurRadius: 8,
+                ),
+            ],
+          ),
+          child: Transform.scale(
+            scale: _isPressed
+                ? 0.95
+                : 1.0, // Apply smooth scaling effect when pressed
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  widget.name,
+                  style: const TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white),
+                  overflow: TextOverflow.ellipsis,
+                ),
+                Text(
+                  widget.noTelp,
+                  style: TextStyle(fontSize: 14, color: Colors.grey[400]),
+                ),
+                const Icon(
+                  Icons.arrow_forward,
+                  color: Colors.white,
+                  size: 18,
+                ),
+              ],
             ),
-            Text(
-              price,
-              style: TextStyle(fontSize: 14, color: Colors.grey[400]),
-            ),
-            const Icon(
-              Icons.arrow_forward,
-              color: Colors.white,
-              size: 18,
-            ),
-          ],
+          ),
         ),
       ),
     );
   }
-}
+
+  // Function to get background color based on states (smooth transition)
+  Color _getBackgroundColor() {
+    if (_isPressed) {
+      return Colors.orange; // Color when pressed
+    } else if (_isHovered) {
+      return Colors.orange.withOpacity(0.7); // Color when hovered
+    }
+    return Colors.grey[900]!; // Default color when not pressed or hovered
+  }
+} 

@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:test1/beans/b_tree_class.dart';
 import 'package:test1/beans/user.dart';
-import 'package:test1/popups/add/add_barang.dart';
+import 'package:test1/popups/add/add_distributor.dart';
 import '../popups/views/distributor_view.dart';
 
 //constructor
@@ -112,11 +112,11 @@ class _BuildDistributorState extends State<Builddistributor> {
                 : ListView.builder(
                     itemCount: _filteredDistributors.length,
                     itemBuilder: (context, index) {
-                      final product = _filteredDistributors[index];
-                      return ProductCard(
-                        id: product['id_distributor'],
-                        name: product['nama_distributor'],
-                        price: product['no_telp_distributor'].toString(),
+                      final distributor = _filteredDistributors[index];
+                      return DistributorView(
+                        id: distributor['id_distributor'],
+                        name: distributor['nama_distributor'],
+                        noTelp: distributor['no_telp_distributor'].toString(),
                       );
                     },
                   ),

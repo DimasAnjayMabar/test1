@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:test1/beans/b_tree_class.dart';
 import 'package:test1/beans/user.dart';
-import 'package:test1/popups/add/add_barang.dart';
 import '../popups/views/customer_view.dart';
 
 //constructor
@@ -112,28 +111,16 @@ class _BuildCustomerState extends State<Buildcustomer> {
                 : ListView.builder(
                     itemCount: _filteredCustomers.length,
                     itemBuilder: (context, index) {
-                      final product = _filteredCustomers[index];
-                      return ProductCard(
-                        id: product['id_customer'],
-                        name: product['nama_customer'],
-                        price: product['no_telp_customer'].toString(),
+                      final customer = _filteredCustomers[index];
+                      return CustomerView(
+                        id: customer['id_customer'],
+                        name: customer['nama_customer'],
+                        noTelp: customer['no_telp_customer'].toString(),
                       );
                     },
                   ),
           ),
         ],
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          showDialog(
-            context: context,
-            builder: (BuildContext context) {
-              return const AddProductPopup(); // This will show as a dialog instead of a new page
-            },
-          );
-        },
-        backgroundColor: Colors.orange,
-        child: const Icon(Icons.add),
       ),
     );
   }

@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:test1/beans/b_tree_class.dart';
 import 'package:test1/beans/user.dart';
-import 'package:test1/popups/add/add_barang.dart';
 import '../popups/views/hutang_view.dart';
 
 //constructor
@@ -116,28 +115,16 @@ class _BuildhutangState extends State<Buildhutang> {
                 : ListView.builder(
                     itemCount: _filteredDebts.length,
                     itemBuilder: (context, index) {
-                      final product = _filteredDebts[index];
-                      return ProductCard(
-                        id: product['id_barang'],
-                        name: product['nama_barang'],
-                        price: product['harga_jual'].toString(),
+                      final debt = _filteredDebts[index];
+                      return HutangView(
+                        id: debt['id_barang'],
+                        name: debt['nama_barang'],
+                        price: debt['harga_jual'].toString(),
                       );
                     },
                   ),
           ),
         ],
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          showDialog(
-            context: context,
-            builder: (BuildContext context) {
-              return const AddProductPopup();
-            },
-          );
-        },
-        backgroundColor: Colors.orange,
-        child: const Icon(Icons.add),
       ),
     );
   }

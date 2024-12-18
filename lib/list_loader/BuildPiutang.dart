@@ -114,23 +114,16 @@ class _BuildPiutangState extends State<Buildpiutang> {
                 : ListView.builder(
                     itemCount: _filteredReceivables.length,
                     itemBuilder: (context, index) {
-                      final product = _filteredReceivables[index];
-                      return ProductCard(
-                        id: product['id_transaksi'],
-                        name: product['nama_customer'],
-                        price: product['total_harga'].toString(),
+                      final receivable = _filteredReceivables[index];
+                      return PiutangView(
+                        id: receivable['id_transaksi'],
+                        name: receivable['nama_customer'],
+                        totalHarga: receivable['total_harga'].toString(),
                       );
                     },
                   ),
           ),
         ],
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          
-        },
-        backgroundColor: Colors.orange,
-        child: const Icon(Icons.add),
       ),
     );
   }

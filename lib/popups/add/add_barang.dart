@@ -231,7 +231,7 @@ class _AddProductPopupState extends State<AddProductPopup> {
         ),
       ),
       actions: [
-        TextButton(
+        ElevatedButton(
           onPressed: () => Navigator.of(context).pop(false),
           child: const Text('Kembali'),
         ),

@@ -4,7 +4,7 @@ import 'package:http/http.dart' as http;
 import 'package:test1/beans/b_tree_class.dart';
 import 'package:test1/beans/user.dart';
 import 'package:test1/popups/add/add_barang.dart';
-import '../popups/views/product_view.dart';
+import 'package:test1/popups/views/product_view.dart';
 
 class Buildgudang extends StatefulWidget {
   const Buildgudang({super.key});
@@ -14,23 +14,20 @@ class Buildgudang extends StatefulWidget {
 }
 
 class _BuildgudangState extends State<Buildgudang> {
-  //inisialisasi
+  // Inisialisasi
   final TextEditingController _searchController = TextEditingController();
   List<dynamic> _filteredProducts = [];
-  final BTree _productBTree = BTree(3); //degree b tree
+  final BTree _productBTree = BTree(3); // degree B tree
 
-  //fetch produk ke dalam list
+  // Fetch produk ke dalam list
   Future<void> fetchProducts() async {
-    //memanggil user secure storage untuk post identitas database
     User? user = await User.getUserCredentials();
-
     if (user == null) {
       throw Exception('No user data found');
     }
 
     final serverIp = user.serverIp;
 
-    //fetch produk dari backend ke database, mengambil identitas database dari secure storage
     final response = await http.post(
       Uri.parse('http://$serverIp:3000/products'),
       headers: {
@@ -49,7 +46,7 @@ class _BuildgudangState extends State<Buildgudang> {
       setState(() {
         _filteredProducts = products;
 
-        //memasukkan produk dalam b tree
+        // Memasukkan produk dalam B tree
         for (var product in products) {
           final lowerCaseName = product['nama_barang'].toLowerCase();
           _productBTree.insert(lowerCaseName, product);
@@ -60,12 +57,11 @@ class _BuildgudangState extends State<Buildgudang> {
     }
   }
 
-  //penggunaan b tree untuk search function
+  // Penggunaan B tree untuk fungsi pencarian
   void _searchProducts(String query) {
     final lowerCaseQuery = query.toLowerCase();
     final matchedProducts = _productBTree.searchBySubstring(lowerCaseQuery);
     setState(() {
-      //akan menyimpan list yang sudah di filter
       _filteredProducts = matchedProducts.toSet().toList();
     });
   }
@@ -76,7 +72,6 @@ class _BuildgudangState extends State<Buildgudang> {
     fetchProducts();
   }
 
-//css atau ui
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -108,19 +103,23 @@ class _BuildgudangState extends State<Buildgudang> {
               ),
             ),
           ),
-          //menampilkan card list barang
+          // Menampilkan kartu produk
           Expanded(
-            //cek jika filtered product kosong
             child: _filteredProducts.isEmpty
-                ? const Center(child: Text('No products available'))
+                ? const Center(
+                    child: Text(
+                      'No products available',
+                      style: TextStyle(color: Colors.white),
+                    ),
+                  )
                 : ListView.builder(
                     itemCount: _filteredProducts.length,
                     itemBuilder: (context, index) {
                       final product = _filteredProducts[index];
-                      return ProductCard(
-                        id: product['id_barang'],
+                      return ProductView(
                         name: product['nama_barang'],
-                        price: product['harga_jual'].toString(),
+                        price: 'Rp ${product['harga_jual']}',
+                        id: product['id_barang'],
                       );
                     },
                   ),
@@ -128,12 +127,11 @@ class _BuildgudangState extends State<Buildgudang> {
         ],
       ),
       floatingActionButton: FloatingActionButton(
-        //mentrigger popup add barang
         onPressed: () {
           showDialog(
             context: context,
             builder: (BuildContext context) {
-              return const AddProductPopup(); // This will show as a dialog instead of a new page
+              return const AddProductPopup();
             },
           );
         },
