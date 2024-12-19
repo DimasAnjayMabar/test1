@@ -17,7 +17,7 @@ class _BuildgudangState extends State<Buildgudang> {
   // Inisialisasi
   final TextEditingController _searchController = TextEditingController();
   List<dynamic> _filteredProducts = [];
-  //faker(ben) c14230272
+  //ben c14230272
   final BTree _productBTree = BTree(3); // degree B tree
 
   // Fetch produk ke dalam list
@@ -42,6 +42,7 @@ class _BuildgudangState extends State<Buildgudang> {
       }),
     );
 
+    //greg c14230127
     if (response.statusCode == 200) {
       final products = json.decode(response.body)['products'];
       setState(() {
@@ -58,7 +59,8 @@ class _BuildgudangState extends State<Buildgudang> {
       throw Exception('Failed to load products');
     }
   }
-
+  
+  //ben c14230272
   // Penggunaan B tree untuk fungsi pencarian
   void _searchProducts(String query) {
     final lowerCaseQuery = query.toLowerCase();
@@ -107,6 +109,7 @@ class _BuildgudangState extends State<Buildgudang> {
             ),
           ),
           // Menampilkan kartu produk
+          //joey c14230256
           Expanded(
             child: _filteredProducts.isEmpty
                 ? const Center(
