@@ -5,6 +5,7 @@ class BTreeNode {
   List<BTreeNode?> children; //menyimpan children
   int maxKeys; //max key untuk b tree
   
+  //constructor
   BTreeNode(this.isLeaf, this.maxKeys)
       : keys = [],
         products = [],
