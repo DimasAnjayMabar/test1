@@ -2,10 +2,11 @@ import 'package:test1/beans/b_tree_node.dart';
 
 class BTree {
   BTreeNode? root;
-  int degree; // Minimum degree of the tree (controls branching factor)
+  int degree; // Minimum degree dari b tree
 
   BTree(this.degree);
 
+  //joey c14230256
   List<dynamic> searchBySubstring(String substring) {
     List<dynamic> results = [];
     _searchBySubstring(root, substring, results);
@@ -15,8 +16,9 @@ class BTree {
   void _searchBySubstring(BTreeNode? node, String substring, List<dynamic> results) {
     if (node == null) return;
 
+    // Traverse seluruh 
     for (int i = 0; i < node.keys.length; i++) {
-      if (node.keys[i].contains(substring)) { // Check if the key contains the substring
+      if (node.keys[i].contains(substring)) {
         results.add(node.products[i]);
       }
       if (!node.isLeaf) {
@@ -24,14 +26,13 @@ class BTree {
       }
     }
 
-    // Search in the last child if it's not a leaf
     if (!node.isLeaf) {
       _searchBySubstring(node.children[node.keys.length], substring, results);
     }
   }
 
-  // Insert a new product into the B-Tree
-  void insert(String key, dynamic product) {
+  //greg
+  void insertIntoBtree(String key, dynamic product) {
     if (root == null) {
       root = BTreeNode(true, degree * 2 - 1);
       root!.keys.add(key);
@@ -48,7 +49,7 @@ class BTree {
     }
   }
 
-  // Helper method: Insert a key into a non-full node
+  //greg
   void _insertNonFull(BTreeNode node, String key, dynamic product) {
     int i = node.keys.length - 1;
 
@@ -76,7 +77,7 @@ class BTree {
     }
   }
 
-  // Helper method: Split a child node
+  //rui c14230277
   void _splitChild(BTreeNode parent, int index) {
     BTreeNode fullNode = parent.children[index]!;
     BTreeNode newNode = BTreeNode(fullNode.isLeaf, fullNode.maxKeys);

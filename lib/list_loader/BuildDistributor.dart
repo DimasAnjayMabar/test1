@@ -51,7 +51,7 @@ class _BuildDistributorState extends State<Builddistributor> {
 
         for (var distributor in distributors) {
           final lowerCaseName = distributor['nama_distributor'].toLowerCase();
-          _distributorBTree.insert(lowerCaseName, distributor);
+          _distributorBTree.insertIntoBtree(lowerCaseName, distributor);
         }
       });
     } else {

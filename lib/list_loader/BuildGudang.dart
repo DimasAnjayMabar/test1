@@ -17,6 +17,7 @@ class _BuildgudangState extends State<Buildgudang> {
   // Inisialisasi
   final TextEditingController _searchController = TextEditingController();
   List<dynamic> _filteredProducts = [];
+  //faker(ben) c14230272
   final BTree _productBTree = BTree(3); // degree B tree
 
   // Fetch produk ke dalam list
@@ -44,12 +45,13 @@ class _BuildgudangState extends State<Buildgudang> {
     if (response.statusCode == 200) {
       final products = json.decode(response.body)['products'];
       setState(() {
+        // Menginisialisasi state dengan filter produk kosong
         _filteredProducts = products;
 
         // Memasukkan produk dalam B tree
         for (var product in products) {
           final lowerCaseName = product['nama_barang'].toLowerCase();
-          _productBTree.insert(lowerCaseName, product);
+          _productBTree.insertIntoBtree(lowerCaseName, product);
         }
       });
     } else {
@@ -62,6 +64,7 @@ class _BuildgudangState extends State<Buildgudang> {
     final lowerCaseQuery = query.toLowerCase();
     final matchedProducts = _productBTree.searchBySubstring(lowerCaseQuery);
     setState(() {
+      // Set state filtered product dengan matched product
       _filteredProducts = matchedProducts.toSet().toList();
     });
   }
