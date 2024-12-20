@@ -17,7 +17,7 @@ class _BuildgudangState extends State<Buildgudang> {
   // Inisialisasi
   final TextEditingController _searchController = TextEditingController();
   List<dynamic> _filteredProducts = [];
-  //ben c14230272
+  //rui c14230277
   final BTree _productBTree = BTree(3); // degree B tree
 
   // Fetch produk ke dalam list
@@ -60,7 +60,7 @@ class _BuildgudangState extends State<Buildgudang> {
     }
   }
   
-  //ben c14230272
+  //rui c14230277
   // Penggunaan B tree untuk fungsi pencarian
   void _searchProducts(String query) {
     final lowerCaseQuery = query.toLowerCase();
@@ -87,6 +87,7 @@ class _BuildgudangState extends State<Buildgudang> {
             padding: const EdgeInsets.all(8.0),
             child: TextField(
               controller: _searchController,
+              //rui c14230277
               onChanged: _searchProducts,
               decoration: InputDecoration(
                 labelText: 'Cari Produk',
