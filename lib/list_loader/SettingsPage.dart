@@ -31,15 +31,24 @@ class _SettingspageState extends State<Settingspage> {
       backgroundColor: Colors.grey[850],
       appBar: AppBar(
         title: const Text(
-          'Settings',
+          'Settings - ',
           style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
         ),
         backgroundColor: const Color(0xFF212529),
         iconTheme: const IconThemeData(color: Colors.white),
         actions: const [],
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back), // Icon back
+          onPressed: () {
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(builder: (context) => const Homepage()), // Pindah ke Homepage
+            );
+          },
+        ),
       ),
       body: RawKeyboardListener(
-        focusNode: _focusNode,  // Ensure the FocusNode is passed here
+        focusNode: _focusNode, // Ensure the FocusNode is passed here
         onKey: (RawKeyEvent event) {
           // Handle the Escape key press
           if (event is RawKeyDownEvent) {
@@ -48,7 +57,8 @@ class _SettingspageState extends State<Settingspage> {
               Navigator.pushAndRemoveUntil(
                 context,
                 MaterialPageRoute(builder: (context) => const Homepage()),
-                (Route<dynamic> route) => false, // Removes all routes until the NotesPage
+                (Route<dynamic> route) =>
+                    false, // Removes all routes until the NotesPage
               );
             }
           }
@@ -59,7 +69,11 @@ class _SettingspageState extends State<Settingspage> {
           child: Column(
             children: [
               // Only one product card here
-              ProductCard(name: 'Ubah Pin Administrator', price: '000000', id: null,),
+              ProductCard(
+                name: 'Ubah Pin Administrator',
+                price: '',
+                id: null,
+              ),
             ],
           ),
         ),
@@ -72,7 +86,8 @@ class ProductCard extends StatefulWidget {
   final String name;
   final String price;
 
-  const ProductCard({super.key, required this.name, required this.price, required id});
+  const ProductCard(
+      {super.key, required this.name, required this.price, required id});
 
   @override
   _ProductCardState createState() => _ProductCardState();
@@ -151,7 +166,10 @@ class _ProductCardState extends State<ProductCard> {
             children: [
               Text(
                 widget.name,
-                style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.white),
+                style: const TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white),
                 overflow: TextOverflow.ellipsis,
               ),
               Text(

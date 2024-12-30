@@ -8,6 +8,7 @@ import 'package:test1/list_loader/BuildPiutang.dart';
 import 'package:test1/list_loader/BuildTransaksi.dart';
 import 'package:test1/list_loader/SettingsPage.dart';
 import 'package:test1/popups/ExitPopup.dart';
+import 'package:test1/popups/verify/verify_admin.dart';
 
 class Homepage extends StatefulWidget {
   const Homepage({super.key});
@@ -33,7 +34,7 @@ class HomepageState extends State<Homepage>
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    _focusNode.requestFocus(); 
+    _focusNode.requestFocus();
   }
 
   void _onTabChanged() {
@@ -47,6 +48,16 @@ class HomepageState extends State<Homepage>
     _tabController?.dispose();
     _focusNode.dispose();
     super.dispose();
+  }
+
+  // Fungsi untuk menampilkan dialog VerifyAdmin
+  void _showVerifyAdminDialog() {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return const VerifyAdmin(); // Panggil VerifyAdmin yang sudah diimpor
+      },
+    );
   }
 
   @override
@@ -63,8 +74,7 @@ class HomepageState extends State<Homepage>
             icon: const Icon(Icons.settings),
             color: Colors.grey,
             onPressed: () {
-              Navigator.push(context,
-                  MaterialPageRoute(builder: (context) => const Settingspage()));
+              _showVerifyAdminDialog();
             },
           ),
           const SizedBox(width: 8),
@@ -73,8 +83,7 @@ class HomepageState extends State<Homepage>
             onKey: (RawKeyEvent event) {
               if (event is RawKeyDownEvent &&
                   event.logicalKey == LogicalKeyboardKey.escape) {
-                Exitpopup.showExitPopup(
-                    context);
+                Exitpopup.showExitPopup(context);
               }
             },
             child: IconButton(
@@ -93,12 +102,26 @@ class HomepageState extends State<Homepage>
       body: TabBarView(
         controller: _tabController,
         children: [
-          _selectedIndex == 0 ? const Buildgudang() : _buildTab(0, ""),//mengarahkan menu ke loader build gudang untuk memunculkan list produk
-          _selectedIndex == 1 ? const Buildtransaksi() : _buildTab(1, ""),//mengarahkan ke loader transaksi
-          _selectedIndex == 2 ? const Buildhutang() : _buildTab(2, ""),//mengarahkan ke loader hutang
-          _selectedIndex == 3 ? const Buildpiutang() : _buildTab(3, ""),//mengarahkan ke loader piutang
-          _selectedIndex == 4 ? const Builddistributor() : _buildTab(4, ""),//mengarahkan menu ke loader build distibutor untuk memunculkan list distributor
-          _selectedIndex == 5 ? const Buildcustomer() : _buildTab(5, "")//mengarahkan ke loader customer
+          _selectedIndex == 0
+              ? const Buildgudang()
+              : _buildTab(0,
+                  ""), //mengarahkan menu ke loader build gudang untuk memunculkan list produk
+          _selectedIndex == 1
+              ? const Buildtransaksi()
+              : _buildTab(1, ""), //mengarahkan ke loader transaksi
+          _selectedIndex == 2
+              ? const Buildhutang()
+              : _buildTab(2, ""), //mengarahkan ke loader hutang
+          _selectedIndex == 3
+              ? const Buildpiutang()
+              : _buildTab(3, ""), //mengarahkan ke loader piutang
+          _selectedIndex == 4
+              ? const Builddistributor()
+              : _buildTab(4,
+                  ""), //mengarahkan menu ke loader build distibutor untuk memunculkan list distributor
+          _selectedIndex == 5
+              ? const Buildcustomer()
+              : _buildTab(5, "") //mengarahkan ke loader customer
         ],
       ),
       bottomNavigationBar: BottomNavigationBar(
@@ -152,7 +175,8 @@ class HomepageState extends State<Homepage>
   Widget _buildTab(int index, String text) {
     return Center(
       child: Text(text,
-          textAlign: TextAlign.center, style: const TextStyle(color: Colors.black)),
+          textAlign: TextAlign.center,
+          style: const TextStyle(color: Colors.black)),
     );
   }
 }
