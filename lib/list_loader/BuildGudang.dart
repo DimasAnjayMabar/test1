@@ -17,6 +17,7 @@ class _BuildgudangState extends State<Buildgudang> {
   // Inisialisasi
   final TextEditingController _searchController = TextEditingController();
   List<dynamic> _filteredProducts = [];
+  //rui c14230277
   final BTree _productBTree = BTree(3); // degree B tree
 
   // Fetch produk ke dalam list
@@ -41,27 +42,31 @@ class _BuildgudangState extends State<Buildgudang> {
       }),
     );
 
+    //greg c14230127
     if (response.statusCode == 200) {
       final products = json.decode(response.body)['products'];
       setState(() {
+        // Menginisialisasi state dengan filter produk kosong
         _filteredProducts = products;
 
         // Memasukkan produk dalam B tree
         for (var product in products) {
           final lowerCaseName = product['nama_barang'].toLowerCase();
-          _productBTree.insert(lowerCaseName, product);
+          _productBTree.insertIntoBtree(lowerCaseName, product);
         }
       });
     } else {
       throw Exception('Failed to load products');
     }
   }
-
+  
+  //rui c14230277
   // Penggunaan B tree untuk fungsi pencarian
   void _searchProducts(String query) {
     final lowerCaseQuery = query.toLowerCase();
     final matchedProducts = _productBTree.searchBySubstring(lowerCaseQuery);
     setState(() {
+      // Set state filtered product dengan matched product
       _filteredProducts = matchedProducts.toSet().toList();
     });
   }
@@ -82,6 +87,7 @@ class _BuildgudangState extends State<Buildgudang> {
             padding: const EdgeInsets.all(8.0),
             child: TextField(
               controller: _searchController,
+              //rui c14230277
               onChanged: _searchProducts,
               decoration: InputDecoration(
                 labelText: 'Cari Produk',
@@ -104,6 +110,7 @@ class _BuildgudangState extends State<Buildgudang> {
             ),
           ),
           // Menampilkan kartu produk
+          //joey c14230256
           Expanded(
             child: _filteredProducts.isEmpty
                 ? const Center(

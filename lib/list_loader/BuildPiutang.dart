@@ -53,7 +53,7 @@ class _BuildPiutangState extends State<Buildpiutang> {
         //pass semua list piutang ke b tree untuk di filter
         for (var receivable in receivables) {
           final lowerCaseName = receivable['nama_customer'].toLowerCase();
-          _receivableBTree.insert(lowerCaseName, receivable);
+          _receivableBTree.insertIntoBtree(lowerCaseName, receivable);
         }
       });
     } else {

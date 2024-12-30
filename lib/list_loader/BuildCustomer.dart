@@ -50,7 +50,7 @@ class _BuildCustomerState extends State<Buildcustomer> {
         //memasukkan data yang terkena filter ke dalam b tree
         for (var customer in customers) {
           final lowerCaseName = customer['nama_customer'].toLowerCase();
-          _customerBTree.insert(lowerCaseName, customer);
+          _customerBTree.insertIntoBtree(lowerCaseName, customer);
         }
       });
     } else {

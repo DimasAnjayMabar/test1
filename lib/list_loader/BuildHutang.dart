@@ -52,7 +52,7 @@ class _BuildhutangState extends State<Buildhutang> {
         //memasukkan produk yang terkena filter ke dalam b tree
         for (var product in debts) {
           final lowerCaseName = product['nama_barang'].toLowerCase();
-          _debtBTree.insert(lowerCaseName, product);
+          _debtBTree.insertIntoBtree(lowerCaseName, product);
         }
       });
     } else {

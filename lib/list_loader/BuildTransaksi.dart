@@ -49,7 +49,7 @@ class _BuildTransaksiState extends State<Buildtransaksi> {
         // Insert products into the B-Tree
         for (var transaction in transactions) {
           final lowerCaseName = transaction['nama_customer'].toLowerCase(); // Convert product name to lowercase
-          _transactionBTree.insert(lowerCaseName, transaction);
+          _transactionBTree.insertIntoBtree(lowerCaseName, transaction);
         }
       });
     } else {
