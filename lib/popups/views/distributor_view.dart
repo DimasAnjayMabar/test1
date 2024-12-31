@@ -26,8 +26,7 @@ class _DistributorViewState extends State<DistributorView> {
   bool _isHovered = false;
 
   //fetch detail distributor ke dalam popup
-  Future<Map<String, dynamic>> fetchDistributorDetails(
-      int distributorId) async {
+  Future<Map<String, dynamic>> fetchDistributorDetails(int distributorId) async {
     try {
       final user = await User.getUserCredentials();
       if (user == null) {

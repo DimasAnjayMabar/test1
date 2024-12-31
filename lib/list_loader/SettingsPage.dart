@@ -1,6 +1,11 @@
+import 'dart:convert';
+import 'package:http/http.dart' as http;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:test1/HomePage.dart'; // Make sure this page is correct
+import 'package:test1/HomePage.dart';
+import 'package:test1/beans/admin.dart';
+import 'package:test1/beans/user.dart'; // Make sure this page is correct
+import 'package:test1/popups/ExitPopupAdmin.dart';
 
 class Settingspage extends StatefulWidget {
   const Settingspage({super.key});
@@ -11,12 +16,83 @@ class Settingspage extends StatefulWidget {
 
 class _SettingspageState extends State<Settingspage> {
   final FocusNode _focusNode = FocusNode();
+  String? adminName;
 
   @override
   void initState() {
     super.initState();
     // Explicitly request focus for the FocusNode
     _focusNode.requestFocus();
+    _loadAdminName();
+  }
+
+  Future<void> _loadAdminName() async {
+    try {
+      final adminIdStr = await Admin
+          .getAdminCredentials(); // Ambil adminId dari Secure Storage
+      if (adminIdStr == null) {
+        throw Exception('Admin ID not found');
+      }
+
+      final adminId = adminIdStr.id_admin; // Mengubah ke tipe data int
+      final adminData = await fetchAdmins(
+          adminId); // Kirimkan adminId untuk mendapatkan data admin
+      setState(() {
+        adminName = adminData['nama_admin']; // Ambil nama_admin dari response
+      });
+    } catch (e) {
+      print('Error loading admin name: $e');
+    }
+  }
+
+  Future<Map<String, dynamic>> fetchAdmins(int adminId) async {
+    try {
+      final user = await User.getUserCredentials();
+
+      if (user == null) {
+        throw Exception('User data is null');
+      }
+
+      final serverIp = user.serverIp;
+
+      final response = await http.post(
+        Uri.parse('http://$serverIp:3000/admins'),
+        headers: {'Content-Type': 'application/json'},
+        body: json.encode({
+          'servername': serverIp,
+          'username': user.username,
+          'password': user.password,
+          'database': user.database,
+          'id_admin': adminId, // Kirimkan adminId di sini
+        }),
+      );
+
+      if (response.statusCode == 200) {
+        final data = json.decode(response.body);
+
+        if (data == null || data['status'] != 'success') {
+          throw Exception(
+              'Failed to load distributor details: ${data['message']}');
+        }
+
+        if (data['admins'] is Map<String, dynamic>) {
+          final admin =
+              data['admins']; // Langsung akses data karena itu adalah objek
+          if (admin['id_admin'] == adminId) {
+            return admin; // Kembalikan data admin yang ditemukan
+          } else {
+            throw Exception('Admin ID mismatch');
+          }
+        } else {
+          throw Exception('Invalid data format');
+        }
+      } else {
+        throw Exception('Failed to load admin details: ${response.statusCode}');
+      }
+    } catch (e) {
+      print('Error fetching admin details: $e');
+      throw Exception('Error fetching admin details');
+    }
   }
 
   @override
@@ -30,8 +106,10 @@ class _SettingspageState extends State<Settingspage> {
     return Scaffold(
       backgroundColor: Colors.grey[850],
       appBar: AppBar(
-        title: const Text(
-          'Settings - ',
+        title: Text(
+          adminName != null
+              ? 'Settings - $adminName' // Tampilkan nama admin jika tersedia
+              : 'Settings - Loading...', // Placeholder saat data belum dimuat
           style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
         ),
         backgroundColor: const Color(0xFF212529),
@@ -40,10 +118,7 @@ class _SettingspageState extends State<Settingspage> {
         leading: IconButton(
           icon: const Icon(Icons.arrow_back), // Icon back
           onPressed: () {
-            Navigator.pushReplacement(
-              context,
-              MaterialPageRoute(builder: (context) => const Homepage()), // Pindah ke Homepage
-            );
+            ExitpopupAdmin.showExitPopup(context);
           },
         ),
       ),

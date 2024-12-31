@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:test1/beans/admin.dart';
 import 'package:test1/beans/user.dart';
 import 'package:test1/list_loader/SettingsPage.dart';
 
@@ -15,11 +16,10 @@ class _VerifyAdminState extends State<VerifyAdmin> {
   // Inisialisasi
   final _formKey = GlobalKey<FormState>();
 
-  String? username_admin;
-  String? password_admin;
-  String? selectedAdminId;
+  String? usernameAdmin;
+  String? passwordAdmin;
+  int? idAdmin;
 
-  // Fungsi untuk submit data produk baru
   Future<void> _loginForm() async {
     if (_formKey.currentState!.validate()) {
       _formKey.currentState!.save();
@@ -28,9 +28,10 @@ class _VerifyAdminState extends State<VerifyAdmin> {
         final user = await User.getUserCredentials();
         if (user == null) throw Exception('User not found');
 
-        // Show loading indicator while the request is being processed
+        // Tampilkan indikator loading
         showDialog(
           context: context,
+          barrierDismissible: false,
           builder: (BuildContext context) {
             return const Center(child: CircularProgressIndicator());
           },
@@ -44,28 +45,51 @@ class _VerifyAdminState extends State<VerifyAdmin> {
             'username': user.username,
             'password': user.password,
             'database': user.database,
-            'username_admin': username_admin,
-            'password_admin': password_admin,
+            'username_admin': usernameAdmin,
+            'password_admin': passwordAdmin,
           }),
         );
 
-        Navigator.pop(context); // Close the loading indicator dialog
+        Navigator.pop(context); // Tutup indikator loading
 
         if (response.statusCode == 200) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Admin verified successfully!')),
-          );
-          // Navigasi ke Settingspage setelah verifikasi berhasil
-          Navigator.pushAndRemoveUntil(
-            context,
-            MaterialPageRoute(builder: (context) => const Settingspage()),
-            (Route<dynamic> route) => false, // Hapus semua rute sebelumnya
-          );
+          final data = json.decode(response.body);
+
+          if (data['status'] == 'success') {
+            final adminData = data['admin'];
+
+            // Pastikan id_admin adalah int sebelum konversi
+            if (adminData['id_admin'] is int) {
+              idAdmin = adminData['id_admin']; // Ambil id_admin dari response
+            } else {
+              throw Exception('id_admin is not an integer');
+            }
+
+            // Simpan kredensial admin menggunakan fungsi yang sudah ada
+            await Admin.saveAdminCredentials(Admin(
+              username_admin: usernameAdmin!,
+              password_admin: passwordAdmin!,
+              id_admin: idAdmin!,  // Menyimpan id_admin sebagai int
+            ));
+            
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(content: Text('Admin verified successfully!')),
+            );
+
+            // Navigasi ke SettingsPage
+            Navigator.pushAndRemoveUntil(
+              context,
+              MaterialPageRoute(builder: (context) => const Settingspage()),
+              (Route<dynamic> route) => false,
+            );
+          } else {
+            throw Exception('Verification failed: ${data['message']}');
+          }
         } else {
           throw Exception('Failed to verify admin: ${response.body}');
         }
       } catch (e) {
-        Navigator.pop(context); // Close the loading indicator on error
+        Navigator.pop(context); // Tutup indikator loading saat error
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('Error: $e')),
         );
@@ -73,7 +97,7 @@ class _VerifyAdminState extends State<VerifyAdmin> {
     }
   }
 
-  // UI for the form
+  // UI untuk form
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
@@ -95,19 +119,18 @@ class _VerifyAdminState extends State<VerifyAdmin> {
                   }
                   return null;
                 },
-                onSaved: (value) => username_admin = value,
+                onSaved: (value) => usernameAdmin = value,
               ),
               TextFormField(
                 decoration: const InputDecoration(labelText: 'Password'),
-                keyboardType: TextInputType.text,
-                obscureText: true, // Hide the input for password
+                obscureText: true, // Input untuk password disembunyikan
                 validator: (value) {
                   if (value == null || value.isEmpty) {
                     return 'Masukkan password yang benar';
                   }
                   return null;
                 },
-                onSaved: (value) => password_admin = value,
+                onSaved: (value) => passwordAdmin = value,
               ),
             ],
           ),
@@ -115,11 +138,11 @@ class _VerifyAdminState extends State<VerifyAdmin> {
       ),
       actions: [
         ElevatedButton(
-          onPressed: () => Navigator.of(context).pop(false), // Return false if cancel
+          onPressed: () => Navigator.of(context).pop(false), // Kembali
           child: const Text('Kembali'),
         ),
         ElevatedButton(
-          onPressed: _loginForm, // Submit form for verification
+          onPressed: _loginForm, // Verifikasi form
           child: const Text('Verifikasi'),
         ),
       ],
