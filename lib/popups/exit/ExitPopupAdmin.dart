@@ -1,11 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:http/http.dart' as http;
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:test1/HomePage.dart';
-import 'package:test1/beans/admin.dart';
-import 'package:test1/beans/user.dart';
-import 'package:test1/WelcomePage.dart';
 
 class ExitpopupAdmin {
   static Future<void> showExitPopup(BuildContext context) {
@@ -32,10 +28,10 @@ class ExitpopupAdmin {
             autofocus: true,
             child: AlertDialog(
               title: const Text(
-                "Confirm Exit",
+                "Konfirmasi Keluar",
                 style: TextStyle(fontWeight: FontWeight.bold),
               ),
-              content: const Text("Are you sure you want to exit?"),
+              content: const Text("Apakah anda yakin ingin logout? (login admin diperlukan ketika mengakses setting)"),
               actions: <Widget>[
                 //sama halnya dengan focus node, tetapi berbentuk ui
                 TextButton(

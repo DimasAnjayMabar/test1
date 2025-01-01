@@ -30,15 +30,15 @@ class Exitpopup {
             autofocus: true,
             child: AlertDialog(
               title: const Text(
-                "Confirm Exit",
+                "Konfirmasi Keluar",
                 style: TextStyle(fontWeight: FontWeight.bold),
               ),
-              content: const Text("Are you sure you want to exit?"),
+              content: const Text("Apakah anda yakin ingin logout? (login ke database dipperlukan setelah logout)"),
               actions: <Widget>[
                 //sama halnya dengan focus node, tetapi berbentuk ui
                 TextButton(
                   child: const Text(
-                    "Cancel",
+                    "Kembali",
                     style: TextStyle(color: Colors.black),
                   ),
                   onPressed: () {
@@ -47,7 +47,7 @@ class Exitpopup {
                 ),
                 TextButton(
                   child: const Text(
-                    "Exit",
+                    "Keluar",
                     style: TextStyle(color: Colors.black),
                   ),
                   onPressed: () {

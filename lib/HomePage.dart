@@ -6,8 +6,7 @@ import 'package:test1/list_loader/BuildGudang.dart';
 import 'package:test1/list_loader/BuildHutang.dart';
 import 'package:test1/list_loader/BuildPiutang.dart';
 import 'package:test1/list_loader/BuildTransaksi.dart';
-import 'package:test1/list_loader/SettingsPage.dart';
-import 'package:test1/popups/ExitPopup.dart';
+import 'package:test1/popups/exit/ExitPopup.dart';
 import 'package:test1/popups/verify/verify_admin.dart';
 
 class Homepage extends StatefulWidget {

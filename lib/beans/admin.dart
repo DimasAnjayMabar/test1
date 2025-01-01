@@ -24,25 +24,25 @@ class Admin {
   // Retrieve admin credentials from secure storage
   static Future<Admin?> getAdminCredentials() async {
     try {
-      String? username_admin = await _storage.read(key: 'username_admin');
-      String? password_admin = await _storage.read(key: 'password_admin');
-      String? id_admin_str = await _storage.read(key: 'id_admin');
+      String? usernameAdmin = await _storage.read(key: 'username_admin');
+      String? passwordAdmin = await _storage.read(key: 'password_admin');
+      String? idAdminStr = await _storage.read(key: 'id_admin');
 
-      if (username_admin == null ||
-          password_admin == null ||
-          id_admin_str == null) {
+      if (usernameAdmin == null ||
+          passwordAdmin == null ||
+          idAdminStr == null) {
         return null; // Return null if any key is missing
       }
 
-      int? id_admin = int.tryParse(id_admin_str);
-      if (id_admin == null) {
+      int? idAdmin = int.tryParse(idAdminStr);
+      if (idAdmin == null) {
         throw Exception('Invalid ID format'); // Handle invalid ID format
       }
 
       return Admin(
-        username_admin: username_admin,
-        password_admin: password_admin,
-        id_admin: id_admin,
+        username_admin: usernameAdmin,
+        password_admin: passwordAdmin,
+        id_admin: idAdmin,
       );
     } catch (e) {
       print('Error retrieving admin credentials: $e');

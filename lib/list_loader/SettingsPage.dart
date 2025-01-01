@@ -5,7 +5,8 @@ import 'package:flutter/services.dart';
 import 'package:test1/HomePage.dart';
 import 'package:test1/beans/admin.dart';
 import 'package:test1/beans/user.dart'; // Make sure this page is correct
-import 'package:test1/popups/ExitPopupAdmin.dart';
+import 'package:test1/popups/exit/ExitPopupAdmin.dart';
+import 'package:test1/popups/edit/edit_pin.dart';
 
 class Settingspage extends StatefulWidget {
   const Settingspage({super.key});
@@ -72,7 +73,7 @@ class _SettingspageState extends State<Settingspage> {
 
         if (data == null || data['status'] != 'success') {
           throw Exception(
-              'Failed to load distributor details: ${data['message']}');
+              'Failed to load admin details: ${data['message']}');
         }
 
         if (data['admins'] is Map<String, dynamic>) {
@@ -110,7 +111,7 @@ class _SettingspageState extends State<Settingspage> {
           adminName != null
               ? 'Settings - $adminName' // Tampilkan nama admin jika tersedia
               : 'Settings - Loading...', // Placeholder saat data belum dimuat
-          style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+          style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
         ),
         backgroundColor: const Color(0xFF212529),
         iconTheme: const IconThemeData(color: Colors.white),
@@ -125,17 +126,8 @@ class _SettingspageState extends State<Settingspage> {
       body: RawKeyboardListener(
         focusNode: _focusNode, // Ensure the FocusNode is passed here
         onKey: (RawKeyEvent event) {
-          // Handle the Escape key press
-          if (event is RawKeyDownEvent) {
-            if (event.logicalKey == LogicalKeyboardKey.escape) {
-              // Navigate to NotesPage when Escape is pressed
-              Navigator.pushAndRemoveUntil(
-                context,
-                MaterialPageRoute(builder: (context) => const Homepage()),
-                (Route<dynamic> route) =>
-                    false, // Removes all routes until the NotesPage
-              );
-            }
+          if (event is RawKeyDownEvent && event.logicalKey == LogicalKeyboardKey.escape) {
+            ExitpopupAdmin.showExitPopup(context);
           }
         },
         child: const SingleChildScrollView(
@@ -175,6 +167,21 @@ class _ProductCardState extends State<ProductCard> {
   void _handleTap() {
     setState(() {
       _isPressed = true;
+    });
+
+    // Menampilkan dialog VerifyAdmin ketika kartu diklik
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return const EditPin(); // Panggil form VerifyAdmin
+      },
+    ).then((result) {
+      // Menangani hasil dari form jika diperlukan (misalnya: kembali ke halaman utama atau refresh data)
+      if (result != null && result) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Pin berhasil diperbarui')),
+        );
+      }
     });
 
     // Briefly reset the press state to create a tap effect
