@@ -1,4 +1,4 @@
-import 'package:test1/beans/b_tree_node.dart';
+import 'package:test1/beans/algorithm/b_tree/b_tree_node.dart';
 
 class BTree {
   BTreeNode? root;

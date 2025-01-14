@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
-import 'package:test1/HomePage.dart';
+import 'package:test1/home_page.dart';
 
 class ExitpopupAdmin {
   static Future<void> showExitPopup(BuildContext context) {
@@ -75,7 +75,7 @@ class ExitpopupAdmin {
       Navigator.of(context).pop(); // Tutup dialog
       Navigator.pushReplacement(
         context,
-        MaterialPageRoute(builder: (context) => const Homepage()),
+        MaterialPageRoute(builder: (context) => const HomePage()),
       );
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(

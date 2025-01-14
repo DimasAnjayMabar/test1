@@ -1,20 +1,20 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
-import 'package:test1/beans/b_tree_class.dart';
-import 'package:test1/beans/user.dart';
+import 'package:test1/beans/algorithm/b_tree/b_tree_class.dart';
+import 'package:test1/beans/storage/secure_storage.dart';
 import '../popups/views/piutang_view.dart';
 
 //constructor
-class Buildpiutang extends StatefulWidget {
-  const Buildpiutang({super.key});
+class PiutangMenu extends StatefulWidget {
+  const PiutangMenu({super.key});
 
   @override
-  _BuildPiutangState createState() => _BuildPiutangState();
+  State<PiutangMenu> createState() => _PiutangMenuState();
 }
 
 //state untuk piutang
-class _BuildPiutangState extends State<Buildpiutang> {
+class _PiutangMenuState extends State<PiutangMenu> {
   //inisialisasi fungsi search
   final TextEditingController _searchController = TextEditingController();
   List<dynamic> _filteredReceivables = [];
@@ -22,42 +22,44 @@ class _BuildPiutangState extends State<Buildpiutang> {
 
   //fetch transaksi yang memiliki piutang = true
   Future<void> fetchReceivables() async {
-    User? user = await User.getUserCredentials();
+    try {
+      final db = await StorageService.getDatabaseIdentity();
+      final password = await StorageService.getPassword();
 
-    if (user == null) {
-      throw Exception('No user data found');
-    }
+      final response = await http.post(
+        Uri.parse('http://${db['serverIp']}:3000/receivables'),
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: json.encode({
+          'server_ip': db['serverIp'],
+          'server_username': db['serverUsername'],
+          'server_password': password,
+          'server_database': db['serverDatabase'],
+        }),
+      );
 
-    final serverIp = user.serverIp;
+      if (response.statusCode == 200) {
+        final receivables = json.decode(response.body)['receivables'] ?? [];
+        setState(() {
+          _filteredReceivables = receivables;//kondisi jika tidak ada filter
 
-    //post identitas database untuk meminta data / fetching
-    final response = await http.post(
-      Uri.parse('http://$serverIp:3000/receivables'),
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: json.encode({
-        'servername': serverIp,
-        'username': user.username,
-        'password': user.password,
-        'database': user.database,
-      }),
-    );
-
-    //jika fetch sukses
-    if (response.statusCode == 200) {
-      final receivables = json.decode(response.body)['receivables'];
+          //pass semua list piutang ke b tree untuk di filter
+          for (var receivable in receivables) {
+            final lowerCaseName = (receivable['nama_customer'] ?? '').toLowerCase();
+            if (lowerCaseName.isNotEmpty) {
+              _receivableBTree.insertIntoBtree(lowerCaseName, receivable);
+            }
+          }
+        });
+      } else {
+        throw Exception('Failed to load receivables');
+      }
+    } catch (e) {
+      debugPrint('Error fetching receivables: $e');
       setState(() {
-        _filteredReceivables = receivables;//kondisi jika tidak ada filter
-
-        //pass semua list piutang ke b tree untuk di filter
-        for (var receivable in receivables) {
-          final lowerCaseName = receivable['nama_customer'].toLowerCase();
-          _receivableBTree.insertIntoBtree(lowerCaseName, receivable);
-        }
+        _filteredReceivables = [];
       });
-    } else {
-      throw Exception('Failed to load products');
     }
   }
 
@@ -66,7 +68,7 @@ class _BuildPiutangState extends State<Buildpiutang> {
     final lowerCaseQuery = query.toLowerCase();
     final matchedTransactions = _receivableBTree.searchBySubstring(lowerCaseQuery);
     setState(() {
-      _filteredReceivables = matchedTransactions.toSet().toList();
+      _filteredReceivables = matchedTransactions?.toSet().toList() ?? [];
     });
   }
 
@@ -110,15 +112,20 @@ class _BuildPiutangState extends State<Buildpiutang> {
           ),
           Expanded(
             child: _filteredReceivables.isEmpty
-                ? const Center(child: Text('No products available'))
+                ? const Center(
+                    child: Text(
+                      'No receivables available',
+                      style: TextStyle(color: Colors.white),
+                    ),
+                  )
                 : ListView.builder(
                     itemCount: _filteredReceivables.length,
                     itemBuilder: (context, index) {
                       final receivable = _filteredReceivables[index];
                       return PiutangView(
-                        id: receivable['id_transaksi'],
-                        name: receivable['nama_customer'],
-                        totalHarga: receivable['total_harga'].toString(),
+                        id: receivable['id_transaksi'] ?? 'Unknown ID',
+                        name: receivable['nama_customer'] ?? 'Unknown Customer',
+                        totalHarga: 'Rp ${receivable['total_harga'] ?? 'N/A'}',
                       );
                     },
                   ),

@@ -1,20 +1,20 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
-import 'package:test1/beans/b_tree_class.dart';
-import 'package:test1/beans/user.dart';
+import 'package:test1/beans/algorithm/b_tree/b_tree_class.dart';
+import 'package:test1/beans/storage/secure_storage.dart';
 import '../popups/views/hutang_view.dart';
 
 //constructor
-class Buildhutang extends StatefulWidget {
-  const Buildhutang({super.key});
+class HutangMenu extends StatefulWidget {
+  const HutangMenu({super.key});
 
   @override
-  _BuildhutangState createState() => _BuildhutangState();
+  State<HutangMenu> createState() => _HutangMenuState();
 }
 
 //create state
-class _BuildhutangState extends State<Buildhutang> {
+class _HutangMenuState extends State<HutangMenu> {
   //inisialisasi fungsi search
   final TextEditingController _searchController = TextEditingController();
   List<dynamic> _filteredDebts = [];
@@ -22,52 +22,52 @@ class _BuildhutangState extends State<Buildhutang> {
 
   //fetch produk yang berisi hutang = true
   Future<void> fetchDebts() async {
-    User? user = await User.getUserCredentials();
+    try {
+      final db = await StorageService.getDatabaseIdentity();
+      final password = await StorageService.getPassword();
 
-    if (user == null) {
-      throw Exception('No user data found');
-    }
+      final response = await http.post(
+        Uri.parse('http://${db['serverIp']}:3000/debts'),
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: json.encode({
+          'server_ip': db['serverIp'],
+          'server_username': db['serverUsername'],
+          'server_password': password,
+          'server_database': db['serverDatabase'],
+        }),
+      );
 
-    final serverIp = user.serverIp;
+      if (response.statusCode == 200) {
+        final debts = json.decode(response.body)['debts'] ?? [];
+        setState(() {
+          _filteredDebts = debts;
 
-    final response = await http.post(
-      Uri.parse('http://$serverIp:3000/debts'),
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: json.encode({
-        'servername': serverIp,
-        'username': user.username,
-        'password': user.password,
-        'database': user.database,
-      }),
-    );
-
-    //jika fetch sukses
-    if (response.statusCode == 200) {
-      final debts = json.decode(response.body)['debts'];
+          for (var product in debts) {
+            final lowerCaseName = (product['nama_barang'] ?? '').toLowerCase();
+            if (lowerCaseName.isNotEmpty) {
+              _debtBTree.insertIntoBtree(lowerCaseName, product);
+            }
+          }
+        });
+      } else {
+        throw Exception('Failed to load debts');
+      }
+    } catch (e) {
+      debugPrint('Error fetching debts: $e');
       setState(() {
-        _filteredDebts = debts; //kondisi inisial dimana filter tidak diaktifkan
-
-        //memasukkan produk yang terkena filter ke dalam b tree
-        for (var product in debts) {
-          final lowerCaseName = product['nama_barang'].toLowerCase();
-          _debtBTree.insertIntoBtree(lowerCaseName, product);
-        }
+        _filteredDebts = [];
       });
-    } else {
-      throw Exception('Failed to load products');
     }
   }
 
   //fungsi untuk memanggil search b tree ke dalam aplikasi
   void _searchDebt(String query) {
     final lowerCaseQuery = query.toLowerCase();
-    final matchedProducts =
-        _debtBTree.searchBySubstring(lowerCaseQuery); // Use substring search
+    final matchedProducts = _debtBTree.searchBySubstring(lowerCaseQuery);
     setState(() {
-      _filteredDebts =
-          matchedProducts.toSet().toList(); // Remove duplicates if any
+      _filteredDebts = matchedProducts?.toSet().toList() ?? [];
     });
   }
 
@@ -111,15 +111,20 @@ class _BuildhutangState extends State<Buildhutang> {
           ),
           Expanded(
             child: _filteredDebts.isEmpty
-                ? const Center(child: Text('No products available'))
+                ? const Center(
+                    child: Text(
+                      'No debts available',
+                      style: TextStyle(color: Colors.white),
+                    ),
+                  )
                 : ListView.builder(
                     itemCount: _filteredDebts.length,
                     itemBuilder: (context, index) {
                       final debt = _filteredDebts[index];
                       return HutangView(
-                        id: debt['id_barang'],
-                        name: debt['nama_barang'],
-                        price: debt['harga_jual'].toString(),
+                        id: debt['id_barang'] ?? 'Unknown ID',
+                        name: debt['nama_barang'] ?? 'Unknown Product',
+                        price: 'Rp ${debt['harga_jual'] ?? 'N/A'}',
                       );
                     },
                   ),

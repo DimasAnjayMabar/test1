@@ -1,9 +1,9 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
-import 'package:test1/beans/admin.dart';
-import 'package:test1/beans/user.dart';
-import 'package:test1/list_loader/SettingsPage.dart';
+import 'package:test1/beans/storage/admin.dart';
+import 'package:test1/beans/storage/secure_storage.dart';
+import 'package:test1/menus/settings_page.dart';
 import 'package:flutter/services.dart';
 
 class EditPin extends StatefulWidget {
@@ -16,22 +16,22 @@ class EditPin extends StatefulWidget {
 class _EditPinState extends State<EditPin> {
   // Inisialisasi
   final _formKey = GlobalKey<FormState>();
-  final FocusNode _focusNode = FocusNode(); // FocusNode untuk menangkap event keyboard
+  final FocusNode _focusNode =
+      FocusNode(); // FocusNode untuk menangkap event keyboard
 
   String? usernameAdmin;
   String? passwordAdmin;
   int? idAdmin;
-  String? newPin;  // Variabel untuk menyimpan PIN baru
+  String? newPin; // Variabel untuk menyimpan PIN baru
 
   Future<void> _EditPinForm() async {
     if (_formKey.currentState!.validate()) {
       _formKey.currentState!.save();
 
       try {
-        final user = await User.getUserCredentials();
-        if (user == null) throw Exception('User not found');
+        final db = await StorageService.getDatabaseIdentity();
+        final password = await StorageService.getPassword();
         final admin = await Admin.getAdminCredentials();
-        if (admin == null) throw Exception('Admin not found');
 
         // Tampilkan indikator loading
         showDialog(
@@ -43,15 +43,17 @@ class _EditPinState extends State<EditPin> {
         );
 
         final response = await http.post(
-          Uri.parse('http://${user.serverIp}:3000/edit-pin'),
-          headers: {'Content-Type': 'application/json'},
+          Uri.parse('http://${db['serverIp']}:3000/edit-pin'),
+          headers: {
+            'Content-Type': 'application/json',
+          },
           body: json.encode({
-            'servername': user.serverIp,
-            'username': user.username,
-            'password': user.password,
-            'database': user.database,
-            'id_admin': admin.id_admin,
-            'new_pin': newPin, // Kirimkan PIN baru
+            'server_ip': db['serverIp'],
+            'server_username': db['serverUsername'],
+            'server_password': password,
+            'server_database': db['serverDatabase'],
+            'admin_id': admin?.id_admin ?? '',
+            'new_pin': newPin
           }),
         );
 
@@ -61,10 +63,9 @@ class _EditPinState extends State<EditPin> {
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(content: Text('Pin edited successfully!')),
           );
-          Navigator.of(context)
-              .pop(true); 
+          Navigator.of(context).pop(true);
         } else {
-          throw Exception('Failed to edit pin: ${response.body}');        
+          throw Exception('Failed to edit pin: ${response.body}');
         }
       } catch (e) {
         ScaffoldMessenger.of(context).showSnackBar(

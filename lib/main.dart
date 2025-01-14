@@ -1,8 +1,13 @@
 import 'package:flutter/material.dart';
-import 'package:test1/HomePage.dart';
-import 'package:test1/WelcomePage.dart';
+import 'package:hive/hive.dart';
+import 'package:hive_flutter/adapters.dart';
+import 'package:test1/home_page.dart';
+import 'package:test1/login_page.dart';
 
-void main() {
+Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await Hive.initFlutter(); // Inisialisasi Hive
+  await Hive.openBox('database_identity'); // Membuka box untuk identitas database
   runApp(const MyApp());
 }
 
@@ -18,9 +23,9 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         fontFamily: 'Montserratt'
       ),
-      home: const WelcomePage(),
+      home: const LoginPage(),
       routes: {
-        '/home' : (context) => const Homepage()
+        '/home' : (context) => const HomePage()
       },
     );
   }

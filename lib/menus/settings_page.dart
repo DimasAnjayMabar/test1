@@ -2,20 +2,20 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:test1/HomePage.dart';
-import 'package:test1/beans/admin.dart';
-import 'package:test1/beans/user.dart'; // Make sure this page is correct
+import 'package:test1/home_page.dart';
+import 'package:test1/beans/storage/admin.dart';
+import 'package:test1/beans/storage/secure_storage.dart'; // Make sure this page is correct
 import 'package:test1/popups/exit/ExitPopupAdmin.dart';
 import 'package:test1/popups/edit/edit_pin.dart';
 
-class Settingspage extends StatefulWidget {
-  const Settingspage({super.key});
+class SettingsPage extends StatefulWidget {
+  const SettingsPage({super.key});
 
   @override
-  _SettingspageState createState() => _SettingspageState();
+  State<SettingsPage> createState() => _SettingsPageState();
 }
 
-class _SettingspageState extends State<Settingspage> {
+class _SettingsPageState extends State<SettingsPage> {
   final FocusNode _focusNode = FocusNode();
   String? adminName;
 
@@ -39,7 +39,7 @@ class _SettingspageState extends State<Settingspage> {
       final adminData = await fetchAdmins(
           adminId); // Kirimkan adminId untuk mendapatkan data admin
       setState(() {
-        adminName = adminData['nama_admin']; // Ambil nama_admin dari response
+        adminName = adminData['admin_name']; // Ambil nama_admin dari response
       });
     } catch (e) {
       print('Error loading admin name: $e');
@@ -48,23 +48,20 @@ class _SettingspageState extends State<Settingspage> {
 
   Future<Map<String, dynamic>> fetchAdmins(int adminId) async {
     try {
-      final user = await User.getUserCredentials();
-
-      if (user == null) {
-        throw Exception('User data is null');
-      }
-
-      final serverIp = user.serverIp;
+      final db = await StorageService.getDatabaseIdentity();
+      final password = await StorageService.getPassword();
 
       final response = await http.post(
-        Uri.parse('http://$serverIp:3000/admins'),
-        headers: {'Content-Type': 'application/json'},
+        Uri.parse('http://${db['serverIp']}:3000/admin'),
+        headers: {
+          'Content-Type': 'application/json',
+        },
         body: json.encode({
-          'servername': serverIp,
-          'username': user.username,
-          'password': user.password,
-          'database': user.database,
-          'id_admin': adminId, // Kirimkan adminId di sini
+          'server_ip': db['serverIp'],
+          'server_username': db['serverUsername'],
+          'server_password': password,
+          'server_database': db['serverDatabase'],
+          'admin_id': adminId
         }),
       );
 
@@ -76,10 +73,10 @@ class _SettingspageState extends State<Settingspage> {
               'Failed to load admin details: ${data['message']}');
         }
 
-        if (data['admins'] is Map<String, dynamic>) {
+        if (data['admin'] is Map<String, dynamic>) {
           final admin =
-              data['admins']; // Langsung akses data karena itu adalah objek
-          if (admin['id_admin'] == adminId) {
+              data['admin']; // Langsung akses data karena itu adalah objek
+          if (admin['admin_id'] == adminId) {
             return admin; // Kembalikan data admin yang ditemukan
           } else {
             throw Exception('Admin ID mismatch');

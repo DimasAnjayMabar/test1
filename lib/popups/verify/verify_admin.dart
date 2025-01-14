@@ -1,9 +1,9 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
-import 'package:test1/beans/admin.dart';
-import 'package:test1/beans/user.dart';
-import 'package:test1/list_loader/SettingsPage.dart';
+import 'package:test1/beans/storage/admin.dart';
+import 'package:test1/beans/storage/secure_storage.dart';
+import 'package:test1/menus/settings_page.dart';
 import 'package:flutter/services.dart';
 
 class VerifyAdmin extends StatefulWidget {
@@ -27,8 +27,8 @@ class _VerifyAdminState extends State<VerifyAdmin> {
       _formKey.currentState!.save();
 
       try {
-        final user = await User.getUserCredentials();
-        if (user == null) throw Exception('User not found');
+        final db = await StorageService.getDatabaseIdentity();
+        final password = await StorageService.getPassword();
 
         // Tampilkan indikator loading
         showDialog(
@@ -40,17 +40,19 @@ class _VerifyAdminState extends State<VerifyAdmin> {
         );
 
         final response = await http.post(
-          Uri.parse('http://${user.serverIp}:3000/verify-admin'),
-          headers: {'Content-Type': 'application/json'},
-          body: json.encode({
-            'servername': user.serverIp,
-            'username': user.username,
-            'password': user.password,
-            'database': user.database,
-            'username_admin': usernameAdmin,
-            'password_admin': passwordAdmin,
-          }),
-        );
+        Uri.parse('http://${db['serverIp']}:3000/verify-admin'),
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: json.encode({
+          'server_ip': db['serverIp'],
+          'server_username': db['serverUsername'],
+          'server_password': password,
+          'server_database': db['serverDatabase'],
+          'admin_username': usernameAdmin,
+          'admin_password': passwordAdmin
+        }),
+      );
 
         Navigator.pop(context); // Tutup indikator loading
 
@@ -61,10 +63,10 @@ class _VerifyAdminState extends State<VerifyAdmin> {
             final adminData = data['admin'];
 
             // Pastikan id_admin adalah int sebelum konversi
-            if (adminData['id_admin'] is int) {
-              idAdmin = adminData['id_admin']; // Ambil id_admin dari response
+            if (adminData['admin_id'] is int) {
+              idAdmin = adminData['admin_id']; // Ambil id_admin dari response
             } else {
-              throw Exception('id_admin is not an integer');
+              throw Exception('id is not an integer');
             }
 
             // Simpan kredensial admin menggunakan fungsi yang sudah ada
@@ -81,7 +83,7 @@ class _VerifyAdminState extends State<VerifyAdmin> {
             // Navigasi ke SettingsPage
             Navigator.pushAndRemoveUntil(
               context,
-              MaterialPageRoute(builder: (context) => const Settingspage()),
+              MaterialPageRoute(builder: (context) => const SettingsPage()),
               (Route<dynamic> route) => false,
             );
           } else {

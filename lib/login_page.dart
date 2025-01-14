@@ -1,18 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:http/http.dart' as http;
-import 'package:test1/beans/user.dart';
+import 'package:test1/beans/storage/secure_storage.dart';
 import 'dart:convert';
 
 //fungsi untuk koneksi aplikasi dengan database
-class WelcomePage extends StatefulWidget {
-  const WelcomePage({super.key});
+class LoginPage extends StatefulWidget {
+  const LoginPage({super.key});
 
   @override
-  _WelcomePageState createState() => _WelcomePageState();
+  State<LoginPage> createState() => _LoginPageState();
 }
 
-class _WelcomePageState extends State<WelcomePage> {
+class _LoginPageState extends State<LoginPage> {
   //controller text field
   final TextEditingController _ipController = TextEditingController();
   final TextEditingController _usernameController = TextEditingController();
@@ -32,12 +32,12 @@ class _WelcomePageState extends State<WelcomePage> {
 
     //mendapatkan text dari text field
     String serverIp = _ipController.text.trim();
-    String username = _usernameController.text.trim();
-    String password = _passwordController.text.trim();
-    String database = _databaseController.text.trim();
+    String serverUsername = _usernameController.text.trim();
+    String serverPassword = _passwordController.text.trim();
+    String serverDatabase = _databaseController.text.trim();
 
     //cek apakah text field kosong
-    if (serverIp.isEmpty || username.isEmpty || database.isEmpty) {
+    if (serverIp.isEmpty || serverUsername.isEmpty || serverDatabase.isEmpty) {
       setState(() {
         _isLoading = false;
         _message = 'Please fill in all the fields';
@@ -51,10 +51,10 @@ class _WelcomePageState extends State<WelcomePage> {
       final response = await http.post(
         Uri.parse('http://$serverIp:3000/connect'),
         body: {
-          'servername': serverIp,
-          'username': username,
-          'password': password,
-          'database': database,
+          'server_ip': serverIp,
+          'server_username': serverUsername,
+          'server_password': serverPassword,
+          'server_database': serverDatabase,
         },
       );
       
@@ -68,13 +68,11 @@ class _WelcomePageState extends State<WelcomePage> {
         });
 
         if (data['status'] == 'success') {
-          //menyimpan text field identitas database ke dalam sebuah secure storage (flutter secure storage)
-          await User.saveUserCredentials(User(
-            serverIp: serverIp,
-            username: username,
-            password: password,
-            database: database,
-          ));
+          await StorageService.saveDatabaseIdentity(
+              serverIp: serverIp,
+              serverUsername: serverUsername,
+              serverDatabase: serverDatabase);
+          await StorageService.savePassword(serverPassword);
 
           //mengalihkan ke homepage
           Navigator.pushReplacementNamed(context, '/home');
@@ -134,7 +132,7 @@ class _WelcomePageState extends State<WelcomePage> {
                   style: const TextStyle(color: Colors.yellow),
                   controller: _ipController,
                   decoration: const InputDecoration(
-                    labelText: 'IP Address',
+                    labelText: 'Servername',
                     labelStyle: TextStyle(color: Colors.yellow),
                     border: OutlineInputBorder(),
                   ),

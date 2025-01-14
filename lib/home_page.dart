@@ -1,22 +1,23 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:test1/list_loader/BuildCustomer.dart';
-import 'package:test1/list_loader/BuildDistributor.dart';
-import 'package:test1/list_loader/BuildGudang.dart';
-import 'package:test1/list_loader/BuildHutang.dart';
-import 'package:test1/list_loader/BuildPiutang.dart';
-import 'package:test1/list_loader/BuildTransaksi.dart';
+import 'package:test1/menus/customer_menu.dart';
+import 'package:test1/menus/distributor_menu.dart';
+import 'package:test1/menus/gudang_menu.dart';
+import 'package:test1/menus/hutang_menu.dart';
+import 'package:test1/menus/piutang_menu.dart';
+import 'package:test1/menus/transaksi_menu.dart';
+import 'package:test1/menus/settings_page.dart';
 import 'package:test1/popups/exit/ExitPopup.dart';
 import 'package:test1/popups/verify/verify_admin.dart';
 
-class Homepage extends StatefulWidget {
-  const Homepage({super.key});
+class HomePage extends StatefulWidget {
+  const HomePage({super.key});
 
   @override
-  HomepageState createState() => HomepageState();
+  State<HomePage> createState() => _HomePageState();
 }
 
-class HomepageState extends State<Homepage>
+class _HomePageState extends State<HomePage>
     with SingleTickerProviderStateMixin {
   TabController? _tabController;
   final FocusNode _focusNode = FocusNode();
@@ -26,7 +27,7 @@ class HomepageState extends State<Homepage>
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 6, vsync: this);
+    _tabController = TabController(length: 3, vsync: this);
     _tabController?.addListener(_onTabChanged);
   }
 
@@ -102,25 +103,25 @@ class HomepageState extends State<Homepage>
         controller: _tabController,
         children: [
           _selectedIndex == 0
-              ? const Buildgudang()
+              ? const GudangMenu()
               : _buildTab(0,
                   ""), //mengarahkan menu ke loader build gudang untuk memunculkan list produk
           _selectedIndex == 1
-              ? const Buildtransaksi()
+              ? const TransaksiMenu()
               : _buildTab(1, ""), //mengarahkan ke loader transaksi
+          // _selectedIndex == 2
+          //     ? const Buildhutang()
+          //     : _buildTab(2, ""), //mengarahkan ke loader hutang
+          // _selectedIndex == 3
+          //     ? const Buildpiutang()
+          //     : _buildTab(3, ""), //mengarahkan ke loader piutang
           _selectedIndex == 2
-              ? const Buildhutang()
-              : _buildTab(2, ""), //mengarahkan ke loader hutang
-          _selectedIndex == 3
-              ? const Buildpiutang()
-              : _buildTab(3, ""), //mengarahkan ke loader piutang
-          _selectedIndex == 4
-              ? const Builddistributor()
-              : _buildTab(4,
+              ? const DistributorMenu()
+              : _buildTab(2,
                   ""), //mengarahkan menu ke loader build distibutor untuk memunculkan list distributor
-          _selectedIndex == 5
-              ? const Buildcustomer()
-              : _buildTab(5, "") //mengarahkan ke loader customer
+          // _selectedIndex == 5
+          //     ? const Buildcustomer()
+          //     : _buildTab(5, "") //mengarahkan ke loader customer
         ],
       ),
       bottomNavigationBar: BottomNavigationBar(
@@ -146,26 +147,26 @@ class HomepageState extends State<Homepage>
                 color: _selectedIndex == 1 ? Colors.yellow : Colors.grey[500]),
             label: 'Transaksi',
           ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.credit_card_off,
-                color: _selectedIndex == 2 ? Colors.yellow : Colors.grey[500]),
-            label: 'Hutang',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.request_quote,
-                color: _selectedIndex == 3 ? Colors.yellow : Colors.grey[500]),
-            label: 'Piutang',
-          ),
+          // BottomNavigationBarItem(
+          //   icon: Icon(Icons.credit_card_off,
+          //       color: _selectedIndex == 2 ? Colors.yellow : Colors.grey[500]),
+          //   label: 'Hutang',
+          // ),
+          // BottomNavigationBarItem(
+          //   icon: Icon(Icons.request_quote,
+          //       color: _selectedIndex == 3 ? Colors.yellow : Colors.grey[500]),
+          //   label: 'Piutang',
+          // ),
           BottomNavigationBarItem(
             icon: Icon(Icons.local_shipping,
-                color: _selectedIndex == 4 ? Colors.yellow : Colors.grey[500]),
+                color: _selectedIndex == 2 ? Colors.yellow : Colors.grey[500]),
             label: 'Distributor',
           ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.person,
-                color: _selectedIndex == 5 ? Colors.yellow : Colors.grey[500]),
-            label: 'Customer',
-          ),
+          // BottomNavigationBarItem(
+          //   icon: Icon(Icons.person,
+          //       color: _selectedIndex == 5 ? Colors.yellow : Colors.grey[500]),
+          //   label: 'Customer',
+          // ),
         ],
       ),
     );

@@ -1,68 +1,72 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
-import 'package:test1/beans/b_tree_class.dart';
-import 'package:test1/beans/user.dart';
+import 'package:test1/beans/algorithm/b_tree/b_tree_class.dart';
+import 'package:test1/beans/storage/secure_storage.dart';
 import 'package:test1/popups/add/add_transaksi.dart';
 import '../popups/views/transaksi_view.dart';
 
-class Buildtransaksi extends StatefulWidget {
-  const Buildtransaksi({super.key});
+class TransaksiMenu extends StatefulWidget {
+  const TransaksiMenu({super.key});
 
   @override
-  _BuildTransaksiState createState() => _BuildTransaksiState();
+  State<TransaksiMenu> createState() => _TransaksiMenuState();
 }
 
-class _BuildTransaksiState extends State<Buildtransaksi> {
+class _TransaksiMenuState extends State<TransaksiMenu> {
   final TextEditingController _searchController = TextEditingController();
   List<dynamic> _filteredTransactions = [];
   final BTree _transactionBTree = BTree(3); // Degree of the tree
 
-  // Fetch products from the backend API and insert them into the B-Tree
+  // Fetch transactions from the backend API and insert them into the B-Tree
   Future<void> fetchTransactions() async {
-    User? user = await User.getUserCredentials();
+    try {
+      final db = await StorageService.getDatabaseIdentity();
+      final password = await StorageService.getPassword();
 
-    if (user == null) {
-      throw Exception('No user data found');
-    }
+      final response = await http.post(
+        Uri.parse('http://${db['serverIp']}:3000/transactions'),
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: json.encode({
+          'server_ip': db['serverIp'],
+          'server_username': db['serverUsername'],
+          'server_password': password,
+          'server_database': db['serverDatabase'],
+        }),
+      );
 
-    final serverIp = user.serverIp;
+      if (response.statusCode == 200) {
+        final transactions = json.decode(response.body)['transactions'] ?? [];
+        setState(() {
+          _filteredTransactions = transactions; // Initially show all transactions
 
-    final response = await http.post(
-      Uri.parse('http://$serverIp:3000/transactions'),
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: json.encode({
-        'servername': serverIp,
-        'username': user.username,
-        'password': user.password,
-        'database': user.database,
-      }),
-    );
-
-    if (response.statusCode == 200) {
-      final transactions = json.decode(response.body)['transactions'];
+          // Insert transactions into the B-Tree
+          for (var transaction in transactions) {
+            final lowerCaseName = (transaction['nama_customer'] ?? '').toLowerCase();
+            if (lowerCaseName.isNotEmpty) {
+              _transactionBTree.insertIntoBtree(lowerCaseName, transaction);
+            }
+          }
+        });
+      } else {
+        throw Exception('Failed to load transactions');
+      }
+    } catch (e) {
+      debugPrint('Error fetching transactions: $e');
       setState(() {
-        _filteredTransactions = transactions; // Initially show all products
-
-        // Insert products into the B-Tree
-        for (var transaction in transactions) {
-          final lowerCaseName = transaction['nama_customer'].toLowerCase(); // Convert product name to lowercase
-          _transactionBTree.insertIntoBtree(lowerCaseName, transaction);
-        }
+        _filteredTransactions = [];
       });
-    } else {
-      throw Exception('Failed to load products');
     }
   }
 
-  // Search products based on user input using the B-Tree
+  // Search transactions based on user input using the B-Tree
   void _searchTransactions(String query) {
     final lowerCaseQuery = query.toLowerCase();
-    final matchedTransactions = _transactionBTree.searchBySubstring(lowerCaseQuery); // Use substring search
+    final matchedTransactions = _transactionBTree.searchBySubstring(lowerCaseQuery);
     setState(() {
-      _filteredTransactions = matchedTransactions.toSet().toList(); // Remove duplicates if any
+      _filteredTransactions = matchedTransactions?.toSet().toList() ?? [];
     });
   }
 
@@ -105,15 +109,20 @@ class _BuildTransaksiState extends State<Buildtransaksi> {
           ),
           Expanded(
             child: _filteredTransactions.isEmpty
-                ? const Center(child: Text('No products available'))
+                ? const Center(
+                    child: Text(
+                      'No transactions available',
+                      style: TextStyle(color: Colors.white),
+                    ),
+                  )
                 : ListView.builder(
                     itemCount: _filteredTransactions.length,
                     itemBuilder: (context, index) {
                       final transaction = _filteredTransactions[index];
                       return TransaksiView(
-                        id: transaction['id_transaksi'],
-                        name: transaction['nama_customer'],
-                        totalHarga: 'Rp ${transaction['total_harga']}',
+                        id: transaction['id_transaksi'] ?? 'Unknown ID',
+                        name: transaction['nama_customer'] ?? 'Unknown Customer',
+                        totalHarga: 'Rp ${transaction['total_harga'] ?? 'N/A'}',
                       );
                     },
                   ),

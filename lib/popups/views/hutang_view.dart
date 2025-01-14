@@ -1,7 +1,7 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
-import 'package:test1/beans/user.dart';
+import 'package:test1/beans/storage/secure_storage.dart';
 import 'package:intl/intl.dart';
 
 //constructor
@@ -30,24 +30,22 @@ class _HutangViewState extends State<HutangView> {
   //fetch detail produk yang memiliki hutang = true
   Future<Map<String, dynamic>> fetchDebtDetails(int productId) async {
     try {
-      final user = await User.getUserCredentials();
-      if (user == null) {
-        throw Exception('User data is null');
-      }
-      final serverIp = user.serverIp;
+      final db = await StorageService.getDatabaseIdentity();
+      final password = await StorageService.getPassword();
 
       final response = await http.post(
-        Uri.parse('http://$serverIp:3000/debt-details'),
-        headers: {'Content-Type': 'application/json'},
+        Uri.parse('http://${db['serverIp']}:3000/distributors'),
+        headers: {
+          'Content-Type': 'application/json',
+        },
         body: json.encode({
-          'servername': serverIp,
-          'username': user.username,
-          'password': user.password,
-          'database': user.database,
-          'product_id': productId,
+          'server_ip': db['serverIp'],
+          'server_username': db['serverUsername'],
+          'server_password': password,
+          'server_database': db['serverDatabase'],
         }),
       );
-
+      
       //jika fetch sukses
       if (response.statusCode == 200) {
         final data = json.decode(response.body);

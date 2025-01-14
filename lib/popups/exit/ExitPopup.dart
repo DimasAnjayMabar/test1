@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:http/http.dart' as http;
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
-import 'package:test1/beans/user.dart';
-import 'package:test1/WelcomePage.dart';
+import 'package:test1/beans/storage/secure_storage.dart';
+import 'package:test1/login_page.dart';
 
 class Exitpopup {
   static Future<void> showExitPopup(BuildContext context) {
@@ -69,14 +69,10 @@ class Exitpopup {
 
     try {
       //memanggil user secure storage untuk terakhir kali sebagai penghubung antara aplikasi dan backend
-      User? user = await User.getUserCredentials();
-      if (user == null) {
-        throw Exception("Invalid user credentials or missing server IP.");
-      }
+      final db = await StorageService.getDatabaseIdentity();
+      final password = await StorageService.getPassword();
 
-      //koneksi ke backend menggunakan server ip
-      final serverIp = user.serverIp;
-      final response = await http.post(Uri.parse('http://$serverIp:3000/logout'));
+      final response = await http.post(Uri.parse('http://${db['serverIp']}:3000/logout'));
 
       //setelah terkoneksi ke backend, menghapuskan isi dari secure storage
       if (response.statusCode == 200) {
@@ -88,7 +84,7 @@ class Exitpopup {
         Navigator.of(context).pop();
         Navigator.pushReplacement(
           context,
-          MaterialPageRoute(builder: (context) => const WelcomePage()),
+          MaterialPageRoute(builder: (context) => const LoginPage()),
         );
       } else {
         ScaffoldMessenger.of(context).showSnackBar(

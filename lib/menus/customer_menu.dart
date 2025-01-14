@@ -1,60 +1,66 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
-import 'package:test1/beans/b_tree_class.dart';
-import 'package:test1/beans/user.dart';
+import 'package:test1/beans/algorithm/b_tree/b_tree_class.dart';
+import 'package:test1/beans/storage/secure_storage.dart';
 import '../popups/views/customer_view.dart';
 
 //constructor
-class Buildcustomer extends StatefulWidget {
-  const Buildcustomer({super.key});
+class CustomerMenu extends StatefulWidget {
+  const CustomerMenu({super.key});
 
   @override
-  _BuildCustomerState createState() => _BuildCustomerState();
+  State<CustomerMenu> createState() => _CustomerMenuState();
 }
 
-class _BuildCustomerState extends State<Buildcustomer> {
+class _CustomerMenuState extends State<CustomerMenu> {
   //inisialisasi fungsi search
   final TextEditingController _searchController = TextEditingController();
   List<dynamic> _filteredCustomers = [];
-  final BTree _customerBTree = BTree(3); 
+  final BTree _customerBTree = BTree(3);
 
   //fetch customer
   Future<void> fetchCustomer() async {
-    User? user = await User.getUserCredentials();
+    try {
+      final db = await StorageService.getDatabaseIdentity();
+      final password = await StorageService.getPassword();
 
-    if (user == null) {
-      throw Exception('No user data found');
-    }
+      final response = await http.post(
+        Uri.parse('http://${db['serverIp']}:3000/customers'),
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: json.encode({
+          'server_ip': db['serverIp'],
+          'server_username': db['serverUsername'],
+          'server_password': password,
+          'server_database': db['serverDatabase'],
+        }),
+      );
 
-    final serverIp = user.serverIp;
+      if (response.statusCode == 200) {
+        final body = json.decode(response.body);
+        final customers = body['customers'] ?? [];
 
-    final response = await http.post(
-      Uri.parse('http://$serverIp:3000/customers'),
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: json.encode({
-        'servername': serverIp,
-        'username': user.username,
-        'password': user.password,
-        'database': user.database,
-      }),
-    );
+        setState(() {
+          _filteredCustomers = customers;
 
-    if (response.statusCode == 200) {
-      final customers = json.decode(response.body)['customers'];
+          for (var customer in customers) {
+            final lowerCaseName =
+                (customer['nama_customer'] ?? '').toLowerCase();
+            if (lowerCaseName.isNotEmpty) {
+              _customerBTree.insertIntoBtree(lowerCaseName, customer);
+            }
+          }
+        });
+      } else {
+        throw Exception('Failed to load customers');
+      }
+    } catch (e) {
+      debugPrint('Error fetching customers: $e');
       setState(() {
-        _filteredCustomers = customers; //inisialisasi filter dengan data yang ada
-
-        //memasukkan data yang terkena filter ke dalam b tree
-        for (var customer in customers) {
-          final lowerCaseName = customer['nama_customer'].toLowerCase();
-          _customerBTree.insertIntoBtree(lowerCaseName, customer);
-        }
+        _filteredCustomers = [];
       });
-    } else {
-      throw Exception('Failed to load customers');
     }
   }
 
@@ -63,7 +69,7 @@ class _BuildCustomerState extends State<Buildcustomer> {
     final lowerCaseQuery = query.toLowerCase();
     final matchedCustomers = _customerBTree.searchBySubstring(lowerCaseQuery);
     setState(() {
-      _filteredCustomers = matchedCustomers.toSet().toList();
+      _filteredCustomers = matchedCustomers?.toSet().toList() ?? [];
     });
   }
 
@@ -73,7 +79,7 @@ class _BuildCustomerState extends State<Buildcustomer> {
     fetchCustomer();
   }
 
-//css atau ui
+  //css atau ui
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -107,15 +113,18 @@ class _BuildCustomerState extends State<Buildcustomer> {
           ),
           Expanded(
             child: _filteredCustomers.isEmpty
-                ? const Center(child: Text('No customer available'))
+                ? const Center(
+                    child: Text('No customer available',
+                        style: TextStyle(color: Colors.white)))
                 : ListView.builder(
                     itemCount: _filteredCustomers.length,
                     itemBuilder: (context, index) {
                       final customer = _filteredCustomers[index];
                       return CustomerView(
-                        id: customer['id_customer'],
-                        name: customer['nama_customer'],
-                        noTelp: customer['no_telp_customer'].toString(),
+                        id: customer['id_customer'] ?? 'Unknown ID',
+                        name: customer['nama_customer'] ?? 'Unknown Name',
+                        noTelp: customer['no_telp_customer']?.toString() ??
+                            'Unknown Phone',
                       );
                     },
                   ),

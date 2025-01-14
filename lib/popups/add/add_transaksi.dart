@@ -1,7 +1,7 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
-import 'package:test1/beans/user.dart';
+import 'package:test1/beans/storage/secure_storage.dart';
 
 class AddTransaksiPopup extends StatefulWidget {
   const AddTransaksiPopup({super.key});
@@ -40,17 +40,19 @@ class _AddTransaksiPopupState extends State<AddTransaksiPopup> {
   // Fetch distributors from the database
   Future<void> _fetchProducts() async {
     try {
-      final user = await User.getUserCredentials();
-      if (user == null) throw Exception('User not found');
+      final db = await StorageService.getDatabaseIdentity();
+      final password = await StorageService.getPassword();
 
       final response = await http.post(
-        Uri.parse('http://${user.serverIp}:3000/new-transaction'),
-        headers: {'Content-Type': 'application/json'},
+        Uri.parse('http://${db['serverIp']}:3000/products'),
+        headers: {
+          'Content-Type': 'application/json',
+        },
         body: json.encode({
-          'servername': user.serverIp,
-          'username': user.username,
-          'password': user.password,
-          'database': user.database,
+          'server_ip': db['serverIp'],
+          'server_username': db['serverUsername'],
+          'server_password': password,
+          'server_database': db['serverDatabase'],
         }),
       );
 
@@ -84,26 +86,27 @@ class _AddTransaksiPopupState extends State<AddTransaksiPopup> {
       _formKey.currentState!.save();
 
       try {
-        final user = await User.getUserCredentials();
-        if (user == null) throw Exception('User not found');
+        final db = await StorageService.getDatabaseIdentity();
+      final password = await StorageService.getPassword();
 
-        final response = await http.post(
-          Uri.parse('http://${user.serverIp}:3000/new-product'),
-          headers: {'Content-Type': 'application/json'},
-          body: json.encode({
-            'servername': user.serverIp,
-            'username': user.username,
-            'password': user.password,
-            'database': user.database,
-            'nama_barang': namaBarang,
-            'harga_beli': hargaBeli,
-            'harga_jual': hargaJual,
-            'stok': stok,
-            'piutang': piutang,
-            'id_barang':
-                int.tryParse(selectedProductId ?? ''), // Convert to int
-          }),
-        );
+      final response = await http.post(
+        Uri.parse('http://${db['serverIp']}:3000/distributors'),
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: json.encode({
+          'server_ip': db['serverIp'],
+          'server_username': db['serverUsername'],
+          'server_password': password,
+          'server_database': db['serverDatabase'],
+          'nama_barang': namaBarang,
+          'harga_beli': hargaBeli,
+          'harga_jual': hargaJual,
+          'stok': stok,
+          'piutang': piutang,
+          'id_barang': int.tryParse(selectedProductId ?? ''), // Convert to int
+        }),
+      );
 
         if (response.statusCode == 200) {
           ScaffoldMessenger.of(context).showSnackBar(

@@ -1,16 +1,17 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
-import 'package:test1/beans/user.dart';
+import 'package:test1/beans/storage/secure_storage.dart';
+import 'package:test1/menus/distributor_menu.dart';
 
-class AddProductPopup extends StatefulWidget {
-  const AddProductPopup({super.key});
+class AddDistributor extends StatefulWidget {
+  const AddDistributor({super.key});
 
   @override
-  _AddProductPopupState createState() => _AddProductPopupState();
+  State<AddDistributor> createState() => _AddDistributorMenu();
 }
 
-class _AddProductPopupState extends State<AddProductPopup> {
+class _AddDistributorMenu extends State<AddDistributor> {
   //inisialisasi
   final _formKey = GlobalKey<FormState>();
 
@@ -25,21 +26,23 @@ class _AddProductPopupState extends State<AddProductPopup> {
       _formKey.currentState!.save();
 
       try {
-        final user = await User.getUserCredentials();
-        if (user == null) throw Exception('User not found');
+        final db = await StorageService.getDatabaseIdentity();
+        final password = await StorageService.getPassword();
 
         final response = await http.post(
-          Uri.parse('http://${user.serverIp}:3000/new-distributor'),
-          headers: {'Content-Type': 'application/json'},
+          Uri.parse('http://${db['serverIp']}:3000/new-distributor'),
+          headers: {
+            'Content-Type': 'application/json',
+          },
           body: json.encode({
-            'servername': user.serverIp,
-            'username': user.username,
-            'password': user.password,
-            'database': user.database,
-            'nama_distributor': namaDistributor,
-            'no_telp_distributor': noTelpDistributor,
-            'email_distributor': emailDistributor,
-            'link_ecommerce': linkEcommerce,
+            'server_ip': db['serverIp'],
+            'server_username': db['serverUsername'],
+            'server_password': password,
+            'server_database': db['serverDatabase'],
+            'distributor_name': namaDistributor,
+            'distributor_phone_number': noTelpDistributor,
+            'distributor_email': emailDistributor,
+            'distributor_ecommerce_link': linkEcommerce,
           }),
         );
 
@@ -102,20 +105,26 @@ class _AddProductPopupState extends State<AddProductPopup> {
               TextFormField(
                 decoration: const InputDecoration(labelText: 'Email'),
                 validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Masukkan email distributor';
+                  if (value != null && value.isNotEmpty) {
+                    final emailRegex = RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$');
+                    if (!emailRegex.hasMatch(value)) {
+                      return 'Masukkan email yang valid';
+                    }
                   }
-                  return null;
+                  return null; // Tidak ada error jika kosong
                 },
                 onSaved: (value) => emailDistributor = value,
               ),
               TextFormField(
                 decoration: const InputDecoration(labelText: 'Link Ecommerce'),
                 validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Masukkan link ecommerce';
+                  if (value != null && value.isNotEmpty) {
+                    final urlRegex = RegExp(r'^(https?:\/\/)?([\w\-]+\.)+[\w\-]+(\/[\w\-]*)*\/?$');
+                    if (!urlRegex.hasMatch(value)) {
+                      return 'Masukkan link yang valid';
+                    }
                   }
-                  return null;
+                  return null; // Tidak ada error jika kosong
                 },
                 onSaved: (value) => linkEcommerce = value,
               ),
