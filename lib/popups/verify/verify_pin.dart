@@ -4,6 +4,8 @@ import 'package:flutter/services.dart';
 import 'package:http/http.dart' as http;
 import 'package:flutter/material.dart';
 import 'package:test1/beans/storage/secure_storage.dart';
+import 'package:test1/beans/storage/temp_id_storage.dart';
+import 'package:test1/beans/storage/temp_pin_storage.dart';
 
 class VerifyPin extends StatefulWidget {
   final VoidCallback onPinVerified;
@@ -62,6 +64,9 @@ class _VerifyPinState extends State<VerifyPin> {
                 const SnackBar(content: Text('Verifikasi sukses')),
               );
             }
+
+            await TemporaryStoragePin.savePinTemporary(
+                TemporaryStoragePin(pin: adminPin!));
 
             // Jalankan callback
             widget.onPinVerified();
@@ -131,10 +136,14 @@ class _VerifyPinState extends State<VerifyPin> {
           ElevatedButton(
             onPressed: () => Navigator.of(context).pop(false),
             child: const Text('Kembali'),
+            style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.yellow, foregroundColor: Colors.black),
           ),
           ElevatedButton(
             onPressed: _verifyPin,
             child: const Text('Verifikasi'),
+            style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.yellow, foregroundColor: Colors.black),
           ),
         ],
       ),

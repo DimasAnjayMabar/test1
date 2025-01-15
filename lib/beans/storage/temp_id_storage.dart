@@ -1,9 +1,9 @@
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
-class TemporaryStorage {
+class TemporaryStorageId {
   int id; // Changed to int
 
-  TemporaryStorage({
+  TemporaryStorageId({
     required this.id,
   });
 
@@ -11,12 +11,12 @@ class TemporaryStorage {
   static const _storage = FlutterSecureStorage();
 
   // Save admin credentials to secure storage
-  static Future<void> saveIdTemporary(TemporaryStorage temporaryStorage) async {
-    await _storage.write(key: 'id_admin', value: temporaryStorage.id.toString()); // Store as string
+  static Future<void> saveIdTemporary(TemporaryStorageId temporaryStorage) async {
+    await _storage.write(key: 'id', value: temporaryStorage.id.toString()); // Store as string
   }
 
   // Retrieve admin credentials from secure storage
-  static Future<TemporaryStorage?> getIdTemporary() async {
+  static Future<TemporaryStorageId?> getIdTemporary() async {
     try {
       String? idStr = await _storage.read(key: 'id');
 
@@ -29,13 +29,17 @@ class TemporaryStorage {
         throw Exception('Invalid ID format'); // Handle invalid ID format
       }
 
-      return TemporaryStorage(
+      return TemporaryStorageId(
         id: id,
       );
     } catch (e) {
       print('Error retrieving admin credentials: $e');
       return null;
     }
+  }
+
+  static Future<void> deleteAll() async{
+    await _storage.delete(key: 'id');
   }
 
   // Method for debugging

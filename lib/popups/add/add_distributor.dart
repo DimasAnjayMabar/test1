@@ -136,11 +136,19 @@ class _AddDistributorMenu extends State<AddDistributor> {
         ElevatedButton(
           onPressed: () => Navigator.of(context).pop(false),
           child: const Text('Kembali'),
+          style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.yellow,
+                  foregroundColor: Colors.black
+                ),
         ),
         ElevatedButton(
           //submit produk baru
           onPressed: _submitForm,
           child: const Text('Tambah'),
+          style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.yellow,
+                  foregroundColor: Colors.black
+                ),
         ),
       ],
     );

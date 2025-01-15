@@ -154,10 +154,18 @@ class _VerifyAdminState extends State<VerifyAdmin> {
           ElevatedButton(
             onPressed: () => Navigator.of(context).pop(false), // Kembali
             child: const Text('Kembali'),
+            style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.yellow,
+                  foregroundColor: Colors.black
+                ),
           ),
           ElevatedButton(
             onPressed: _loginForm, // Verifikasi form
             child: const Text('Verifikasi'),
+            style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.yellow,
+                  foregroundColor: Colors.black
+                ),
           ),
         ],
       ),

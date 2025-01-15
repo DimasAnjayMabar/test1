@@ -5,7 +5,7 @@ import 'package:flutter/services.dart';
 import 'package:test1/home_page.dart';
 import 'package:test1/beans/storage/admin.dart';
 import 'package:test1/beans/storage/secure_storage.dart'; // Make sure this page is correct
-import 'package:test1/popups/exit/ExitPopupAdmin.dart';
+import 'package:test1/popups/exit/logout_settings.dart';
 import 'package:test1/popups/edit/edit_pin.dart';
 
 class SettingsPage extends StatefulWidget {
@@ -116,7 +116,7 @@ class _SettingsPageState extends State<SettingsPage> {
         leading: IconButton(
           icon: const Icon(Icons.arrow_back), // Icon back
           onPressed: () {
-            ExitpopupAdmin.showExitPopup(context);
+            LogoutSettings.showExitPopup(context);
           },
         ),
       ),
@@ -124,7 +124,7 @@ class _SettingsPageState extends State<SettingsPage> {
         focusNode: _focusNode, // Ensure the FocusNode is passed here
         onKey: (RawKeyEvent event) {
           if (event is RawKeyDownEvent && event.logicalKey == LogicalKeyboardKey.escape) {
-            ExitpopupAdmin.showExitPopup(context);
+            LogoutSettings.showExitPopup(context);
           }
         },
         child: const SingleChildScrollView(

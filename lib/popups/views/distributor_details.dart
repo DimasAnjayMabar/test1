@@ -2,7 +2,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:test1/beans/storage/secure_storage.dart';
-import 'package:test1/beans/storage/temporary_storage.dart';
+import 'package:test1/beans/storage/temp_id_storage.dart';
 import 'package:test1/popups/edit/edit_distributor.dart';
 import 'package:test1/popups/verify/verify_admin.dart';
 import 'package:test1/popups/verify/verify_pin.dart';
@@ -120,6 +120,10 @@ class _DistributorDetailsState extends State<DistributorDetails> {
     }
   }
 
+  String getSafeString(String? value) {
+    return (value == null || value.isEmpty) ? 'Tidak ada' : value;
+  }
+
   //memasukkan hasil fetch ke dalam popup
   Future<void> _showDistributorDetails(BuildContext context, distributorId) async {
     try {
@@ -134,11 +138,11 @@ class _DistributorDetailsState extends State<DistributorDetails> {
             content: SingleChildScrollView(
               child: ListBody(
                 children: <Widget>[
-                  Text('No Telp: ${distributorDetails['distributor_phone_number']}'),
+                  Text('No Telp: ${getSafeString(distributorDetails['distributor_phone_number'])}'),
                   const SizedBox(height: 5.0),
-                  Text('Email: ${distributorDetails['distributor_email']}'),
+                  Text('Email: ${getSafeString(distributorDetails['distributor_email'])}'),
                   const SizedBox(height: 5.0),
-                  Text('Ecommerce: ${distributorDetails['distributor_ecommerce_link']}'),
+                  Text('Ecommerce: ${getSafeString(distributorDetails['distributor_ecommerce_link'])}'),
                 ],
               ),
             ),
@@ -170,7 +174,7 @@ class _DistributorDetailsState extends State<DistributorDetails> {
                   if (pinVerified == true) {
                     int distributorId = widget.id;
 
-                    await TemporaryStorage.saveIdTemporary(TemporaryStorage(id: distributorId));
+                    await TemporaryStorageId.saveIdTemporary(TemporaryStorageId(id: distributorId));
 
                     showDialog(
                       context: context,

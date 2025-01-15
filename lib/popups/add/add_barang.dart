@@ -286,16 +286,20 @@ class _AddBarangState extends State<AddBarang> {
                   onPressed: () {
                     Navigator.pop(context); // Kembali menutup alert dialog
                   },
-                  child: Text("KEMBALI"),
-                  style:
-                      ElevatedButton.styleFrom(backgroundColor: Colors.white),
+                  child: Text("Kembali"),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.yellow,
+                    foregroundColor: Colors.black
+                  ),
                 ),
                 SizedBox(width: 10),
                 ElevatedButton(
                   onPressed: () {},
-                  child: Text("SIMPAN"),
-                  style:
-                      ElevatedButton.styleFrom(backgroundColor: Colors.white),
+                  child: Text("Simpan"),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.yellow,
+                    foregroundColor: Colors.black
+                  ),
                 ),
               ],
             ),

@@ -121,10 +121,18 @@ class _EditPinState extends State<EditPin> {
           ElevatedButton(
             onPressed: () => Navigator.of(context).pop(false), // Kembali
             child: const Text('Kembali'),
+            style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.yellow,
+                  foregroundColor: Colors.black
+                ),
           ),
           ElevatedButton(
             onPressed: _EditPinForm, // Verifikasi form
             child: const Text('Simpan'),
+            style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.yellow,
+                  foregroundColor: Colors.black
+                ),
           ),
         ],
       ),

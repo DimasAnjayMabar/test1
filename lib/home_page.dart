@@ -7,7 +7,7 @@ import 'package:test1/menus/hutang_menu.dart';
 import 'package:test1/menus/piutang_menu.dart';
 import 'package:test1/menus/transaksi_menu.dart';
 import 'package:test1/menus/settings_page.dart';
-import 'package:test1/popups/exit/ExitPopup.dart';
+import 'package:test1/popups/exit/logout_app.dart';
 import 'package:test1/popups/verify/verify_admin.dart';
 
 class HomePage extends StatefulWidget {
@@ -83,7 +83,7 @@ class _HomePageState extends State<HomePage>
             onKey: (RawKeyEvent event) {
               if (event is RawKeyDownEvent &&
                   event.logicalKey == LogicalKeyboardKey.escape) {
-                Exitpopup.showExitPopup(context);
+                LogoutApp.showExitPopup(context);
               }
             },
             child: IconButton(
@@ -91,7 +91,7 @@ class _HomePageState extends State<HomePage>
               color: Colors.grey,
               onPressed: () {
                 //memunculkan popup logout
-                Exitpopup.showExitPopup(context);
+                LogoutApp.showExitPopup(context);
               },
             ),
           ),

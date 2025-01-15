@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:http/http.dart' as http;
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
-import 'package:test1/home_page.dart';
+import 'package:test1/beans/storage/secure_storage.dart';
+import 'package:test1/login_page.dart';
 
-class ExitpopupAdmin {
+class LogoutApp {
   static Future<void> showExitPopup(BuildContext context) {
     return showDialog(
       context: context,
@@ -31,26 +33,34 @@ class ExitpopupAdmin {
                 "Konfirmasi Keluar",
                 style: TextStyle(fontWeight: FontWeight.bold),
               ),
-              content: const Text("Apakah anda yakin ingin logout? (login admin diperlukan ketika mengakses setting)"),
+              content: const Text("Apakah anda yakin ingin logout? (login ke database dipperlukan setelah logout)"),
               actions: <Widget>[
                 //sama halnya dengan focus node, tetapi berbentuk ui
-                TextButton(
+                ElevatedButton(
                   child: const Text(
-                    "Cancel",
+                    "Kembali",
                     style: TextStyle(color: Colors.black),
                   ),
                   onPressed: () {
                     Navigator.of(context).pop(); // Close the dialog
                   },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.yellow,
+                    foregroundColor: Colors.black
+                  ),
                 ),
-                TextButton(
+                ElevatedButton(
                   child: const Text(
-                    "Exit",
+                    "Keluar",
                     style: TextStyle(color: Colors.black),
                   ),
                   onPressed: () {
                     _handleLogout(context); // Call logout function
                   },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.yellow,
+                    foregroundColor: Colors.black
+                  ),
                 ),
               ],
             ),
@@ -62,21 +72,33 @@ class ExitpopupAdmin {
 
   //fungsi untuk logout
   static Future<void> _handleLogout(BuildContext context) async {
-    // Inisialisasi secure storage
+    //inisialisasi 
     const storage = FlutterSecureStorage();
 
     try {
-      // Hapus data admin dari secure storage
-      await storage.delete(key: 'username_admin');
-      await storage.delete(key: 'password_admin');
-      await storage.delete(key: 'id_admin');
+      //memanggil user secure storage untuk terakhir kali sebagai penghubung antara aplikasi dan backend
+      final db = await StorageService.getDatabaseIdentity();
+      final password = await StorageService.getPassword();
 
-      // Navigasi kembali ke halaman WelcomePage atau Homepage
-      Navigator.of(context).pop(); // Tutup dialog
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (context) => const HomePage()),
-      );
+      final response = await http.post(Uri.parse('http://${db['serverIp']}:3000/logout'));
+
+      //setelah terkoneksi ke backend, menghapuskan isi dari secure storage
+      if (response.statusCode == 200) {
+        await storage.delete(key: 'username');
+        await storage.delete(key: 'password');
+        await storage.delete(key: 'database');
+        await storage.delete(key: 'servername');
+
+        Navigator.of(context).pop();
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => const LoginPage()),
+        );
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text("Failed to log out. Please try again.")),
+        );
+      }
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text("Error: Unable to log out. ${e.toString()}")),
