@@ -137,7 +137,13 @@ class _GudangMenuState extends State<GudangMenu> {
           showDialog(
             context: context,
             builder: (BuildContext context) {
-              return AddBarang();
+              return Dialog(
+                child: SizedBox(
+                  width: 400, // Tentukan lebar yang diinginkan
+                  height: 600, // Tentukan tinggi yang diinginkan
+                  child: AddBarang(),
+                ),
+              );
             },
           );
         },
