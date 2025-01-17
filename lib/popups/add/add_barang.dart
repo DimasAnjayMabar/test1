@@ -32,26 +32,51 @@ class ResponsiveHelper {
   }
 }
 
+class TableRowData {
+  String name;
+  String buyPrice;
+  String percentProfit;
+  String stock;
+  String category;
+
+  TableRowData({
+    this.name = '',
+    this.buyPrice = '',
+    this.percentProfit = '',
+    this.stock = '',
+    this.category = '',
+  });
+}
+
 class AddBarang extends StatefulWidget {
   @override
   State<AddBarang> createState() => _AddBarangState();
 }
 
 class _AddBarangState extends State<AddBarang> {
-  List<String> distributorList = [];
+   List<String> distributorList = [];
   List<String> categoryList = [];
-  List<TableRow> rows = [];
   String selectedDistributor = '';
-  String selectedCategory = '';
   DateTime selectedDate = DateTime.now();
   double fontSize = 16.0;
+  List<TableRowData> rowDataList = [];
+  
+  final ScrollController verticalScrollController = ScrollController();
+  final ScrollController horizontalScrollController = ScrollController();
+
+  @override
+  void dispose() {
+    verticalScrollController.dispose();
+    horizontalScrollController.dispose();
+    super.dispose();
+  }
 
   @override
   void initState() {
     super.initState();
     fetchDistributorDropdown();
     fetchCategoryDropdown();
-    // addRow(); // Tambahkan row default saat pertama kali
+    addRow(); // Tambahkan row default saat pertama kali
   }
 
   Future<void> fetchDistributorDropdown() async {
@@ -130,75 +155,14 @@ class _AddBarangState extends State<AddBarang> {
 
   void addRow() {
     setState(() {
-      rows.add(
-        TableRow(
-          children: [
-            Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: TextField(decoration: InputDecoration(hintText: "Name")),
-            ),
-            Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: TextField(
-                keyboardType: TextInputType.number,
-                decoration: InputDecoration(hintText: "Buy Price"),
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: TextField(
-                keyboardType: TextInputType.number,
-                decoration: InputDecoration(hintText: "Percent Profit"),
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: TextField(
-                keyboardType: TextInputType.number,
-                decoration: InputDecoration(hintText: "Stock"),
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: DropdownButton<String>(
-                      isExpanded: true,
-                      value: selectedCategory.isEmpty
-                          ? null
-                          : selectedCategory,
-                      hint: Text("Select Category",
-                          style: TextStyle(fontSize: fontSize)),
-                      dropdownColor: Colors.white,
-                      items: categoryList.map((category) {
-                        return DropdownMenuItem<String>(
-                          value: category,
-                          child: Text(category,
-                              style: TextStyle(
-                                  fontSize: fontSize, color: Colors.black)),
-                        );
-                      }).toList(),
-                      onChanged: (value) {
-                        setState(() {
-                          selectedCategory = value ?? '';
-                        });
-                      },
-                    ),
-            ),
-            Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: Text("0"), // Placeholder untuk subtotal
-            ),
-          ],
-        ),
-      );
+      rowDataList.add(TableRowData());
     });
   }
 
-  void removeRow() {
-    if (rows.isNotEmpty) {
-      setState(() {
-        rows.removeLast();
-      });
-    }
+  void removeRow(int index) {
+    setState(() {
+      rowDataList.removeAt(index);
+    });
   }
 
   void selectDate(BuildContext context) async {
@@ -217,7 +181,6 @@ class _AddBarangState extends State<AddBarang> {
 
   @override
   Widget build(BuildContext context) {
-
     return ClipRRect(
       borderRadius: BorderRadius.circular(16.0),
       child: Scaffold(
@@ -282,77 +245,106 @@ class _AddBarangState extends State<AddBarang> {
                   Spacer(),
                 ],
               ),
-              SizedBox(height: 20),
               Expanded(
-                child: SingleChildScrollView(
-                  physics:
-                      const BouncingScrollPhysics(), // Efek bouncing untuk scroll
-                  scrollDirection:
-                      Axis.horizontal, // Scroll horizontal untuk tabel
-                  child: ConstrainedBox(
-                    constraints: BoxConstraints(
-                        minWidth: MediaQuery.of(context)
-                            .size
-                            .width), // Pastikan tabel memiliki lebar minimal
-                    child: SingleChildScrollView(
-                      physics:
-                          const BouncingScrollPhysics(), // Efek bouncing untuk scroll vertikal
-                      scrollDirection:
-                          Axis.vertical, // Scroll vertikal tetap ditambahkan
-                      child: Table(
-                        border: TableBorder.all(color: Colors.black),
-                        columnWidths: {
-                          0: IntrinsicColumnWidth(), // Kolom NAME menyesuaikan konten
-                          1: IntrinsicColumnWidth(), // Kolom BUY PRICE menyesuaikan konten
-                          2: IntrinsicColumnWidth(), // Kolom PERCENT PROFIT menyesuaikan konten
-                          3: IntrinsicColumnWidth(), // Kolom STOCK menyesuaikan konten
-                          4: IntrinsicColumnWidth(), // Kolom CATEGORY menyesuaikan konten
-                          5: IntrinsicColumnWidth(), // Kolom SUBTOTAL menyesuaikan konten
-                        },
-                        children: [
-                          TableRow(
-                            decoration: BoxDecoration(color: Colors.white),
-                            children: [
-                              Padding(
-                                padding: const EdgeInsets.all(8.0),
-                                child: Text("NAME",
-                                    textAlign: TextAlign.center,
-                                    style: TextStyle(fontSize: fontSize)),
-                              ),
-                              Padding(
-                                padding: const EdgeInsets.all(8.0),
-                                child: Text("BUY PRICE",
-                                    textAlign: TextAlign.center,
-                                    style: TextStyle(fontSize: fontSize)),
-                              ),
-                              Padding(
-                                padding: const EdgeInsets.all(8.0),
-                                child: Text("PERCENT PROFIT",
-                                    textAlign: TextAlign.center,
-                                    style: TextStyle(fontSize: fontSize)),
-                              ),
-                              Padding(
-                                padding: const EdgeInsets.all(8.0),
-                                child: Text("STOCK",
-                                    textAlign: TextAlign.center,
-                                    style: TextStyle(fontSize: fontSize)),
-                              ),
-                              Padding(
-                                padding: const EdgeInsets.all(8.0),
-                                child: Text("CATEGORY",
-                                    textAlign: TextAlign.center,
-                                    style: TextStyle(fontSize: fontSize)),
-                              ),
-                              Padding(
-                                padding: const EdgeInsets.all(8.0),
-                                child: Text("SUBTOTAL",
-                                    textAlign: TextAlign.center,
-                                    style: TextStyle(fontSize: fontSize)),
-                              ),
-                            ],
-                          ),
-                          ...rows,
-                        ],
+                child: Scrollbar(
+                  controller: horizontalScrollController,
+                  thumbVisibility: true, // Agar scrollbar terlihat
+                  child: SingleChildScrollView(
+                    controller: horizontalScrollController,
+                    physics: const BouncingScrollPhysics(),
+                    scrollDirection: Axis.horizontal,
+                    child: Scrollbar(
+                      controller: verticalScrollController,
+                      thumbVisibility: true,
+                      child: SingleChildScrollView(
+                        controller: verticalScrollController,
+                        physics: const BouncingScrollPhysics(),
+                        scrollDirection: Axis.vertical,
+                        child: Table(
+                          border: TableBorder.all(color: Colors.black),
+                          columnWidths: {
+                            0: IntrinsicColumnWidth(),
+                            1: IntrinsicColumnWidth(),
+                            2: IntrinsicColumnWidth(),
+                            3: IntrinsicColumnWidth(),
+                            4: IntrinsicColumnWidth(),
+                            5: IntrinsicColumnWidth(),
+                          },
+                          children: [
+                            TableRow(
+                              children: [
+                                Text("NAME"),
+                                Text("BUY PRICE"),
+                                Text("PERCENT PROFIT"),
+                                Text("STOCK"),
+                                Text("CATEGORY"),
+                                Text("REMOVE"),
+                              ],
+                            ),
+                            ...rowDataList.asMap().entries.map((entry) {
+                              int index = entry.key;
+                              TableRowData data = entry.value;
+                              return TableRow(
+                                children: [
+                                  TextField(
+                                    decoration:
+                                        InputDecoration(hintText: "Name"),
+                                    onChanged: (value) => setState(() {
+                                      data.name = value;
+                                    }),
+                                  ),
+                                  TextField(
+                                    keyboardType: TextInputType.number,
+                                    decoration: InputDecoration(
+                                        hintText: "Buy Price"),
+                                    onChanged: (value) => setState(() {
+                                      data.buyPrice = value;
+                                    }),
+                                  ),
+                                  TextField(
+                                    keyboardType: TextInputType.number,
+                                    decoration: InputDecoration(
+                                        hintText: "Percent Profit"),
+                                    onChanged: (value) => setState(() {
+                                      data.percentProfit = value;
+                                    }),
+                                  ),
+                                  TextField(
+                                    keyboardType: TextInputType.number,
+                                    decoration:
+                                        InputDecoration(hintText: "Stock"),
+                                    onChanged: (value) => setState(() {
+                                      data.stock = value;
+                                    }),
+                                  ),
+                                  DropdownButton<String>(
+                                    isExpanded: true,
+                                    value: data.category.isEmpty
+                                        ? null
+                                        : data.category,
+                                    hint: Text("Select Category"),
+                                    items: categoryList.map((category) {
+                                      return DropdownMenuItem<String>(
+                                        value: category,
+                                        child: Text(category),
+                                      );
+                                    }).toList(),
+                                    onChanged: (value) => setState(() {
+                                      data.category = value ?? '';
+                                    }),
+                                  ),
+                                  IconButton(
+                                    icon: Icon(Icons.remove_circle,
+                                        color: Colors.red),
+                                    onPressed: () => setState(() {
+                                      removeRow(index);
+                                    }),
+                                  ),
+                                ],
+                              );
+                            }).toList(),
+                          ],
+                        ),
                       ),
                     ),
                   ),
@@ -369,16 +361,6 @@ class _AddBarangState extends State<AddBarang> {
                           CircleBorder(), // Membuat tombol berbentuk lingkaran
                     ),
                     child: Icon(Icons.add,
-                        color: Colors.white), // Ikon dan warnanya
-                  ),
-                  ElevatedButton(
-                    onPressed: removeRow,
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.red, // Warna tombol
-                      shape:
-                          CircleBorder(), // Membuat tombol berbentuk lingkaran
-                    ),
-                    child: Icon(Icons.remove,
                         color: Colors.white), // Ikon dan warnanya
                   ),
                 ],
@@ -416,7 +398,6 @@ class _AddBarangState extends State<AddBarang> {
                   ),
                 ],
               ),
-              // Tambahan konten lainnya (seperti tabel dan tombol)
             ],
           ),
         ),

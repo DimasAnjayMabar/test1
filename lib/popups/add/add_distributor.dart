@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:test1/beans/storage/secure_storage.dart';
 import 'package:test1/menus/distributor_menu.dart';
+import 'package:test1/popups/verify/distributor/verify_distributor_change.dart';
+import 'package:test1/popups/verify/distributor/verify_distributor_create.dart';
 
 class AddDistributor extends StatefulWidget {
   const AddDistributor({super.key});
@@ -21,7 +23,7 @@ class _AddDistributorMenu extends State<AddDistributor> {
   String? linkEcommerce;
 
   //fungsi untuk submit data produk baru
-  Future<void> _submitForm() async {
+  Future<void> _createDistributor() async {
     if (_formKey.currentState!.validate()) {
       _formKey.currentState!.save();
 
@@ -142,14 +144,21 @@ class _AddDistributorMenu extends State<AddDistributor> {
                 ),
         ),
         ElevatedButton(
-          //submit produk baru
-          onPressed: _submitForm,
-          child: const Text('Tambah'),
-          style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.yellow,
-                  foregroundColor: Colors.black
+                  onPressed: () {
+                    VerifyDistributorCreate.showExitPopup(
+                      context,
+                      () {
+                        // Panggil fungsi _EditPinForm
+                        _createDistributor();
+                      },
+                    );
+                  },
+                  child: const Text('Tambah'),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.yellow,
+                    foregroundColor: Colors.black,
+                  ),
                 ),
-        ),
       ],
     );
   }

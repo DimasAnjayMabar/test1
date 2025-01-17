@@ -5,6 +5,7 @@ import 'package:test1/beans/storage/admin.dart';
 import 'package:test1/beans/storage/secure_storage.dart';
 import 'package:test1/menus/settings_page.dart';
 import 'package:flutter/services.dart';
+import 'package:test1/popups/verify/settings/verify_pin_change.dart';
 
 class EditPin extends StatefulWidget {
   const EditPin({super.key});
@@ -127,12 +128,20 @@ class _EditPinState extends State<EditPin> {
                 ),
           ),
           ElevatedButton(
-            onPressed: _EditPinForm, // Verifikasi form
+            onPressed: () {
+              VerifyPinChange.showExitPopup(
+                context,
+                () {
+                  // Panggil fungsi _EditPinForm
+                  _EditPinForm();
+                },
+              );
+            },
             child: const Text('Simpan'),
             style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.yellow,
-                  foregroundColor: Colors.black
-                ),
+              backgroundColor: Colors.yellow,
+              foregroundColor: Colors.black,
+            ),
           ),
         ],
       ),

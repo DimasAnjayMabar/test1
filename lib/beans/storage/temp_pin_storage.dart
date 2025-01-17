@@ -31,7 +31,7 @@ class TemporaryStoragePin {
   }
 
   static Future<void> deleteAll() async {
-    await _storage.delete(key: 'id');
+    await _storage.delete(key: 'pin');
   }
 
   // Method for debugging

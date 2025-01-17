@@ -4,8 +4,9 @@ import 'package:http/http.dart' as http;
 import 'package:test1/beans/storage/secure_storage.dart';
 import 'package:test1/beans/storage/temp_id_storage.dart';
 import 'package:test1/popups/edit/edit_distributor.dart';
-import 'package:test1/popups/verify/verify_admin.dart';
-import 'package:test1/popups/verify/verify_pin.dart';
+import 'package:test1/popups/verify/distributor/verify_distributor_delete.dart';
+import 'package:test1/popups/verify/settings/verify_admin.dart';
+import 'package:test1/popups/verify/settings/verify_pin.dart';
 
 //constructor
 class DistributorDetails extends StatefulWidget {
@@ -197,12 +198,22 @@ class _DistributorDetailsState extends State<DistributorDetails> {
               const SizedBox(height: 10.0),
               ElevatedButton(
                 onPressed: () {
-                  showDialog(
-                    context: context,
-                    barrierDismissible: false,
-                    builder: (BuildContext dialogContext) {
-                      return VerifyPin(
-                        onPinVerified: () => _deleteDistributor(widget.id),
+                  // Tampilkan konfirmasi penghapusan distributor
+                  VerifyDistributorDelete.showExitPopup(
+                    context,
+                    () {
+                      // Jika pengguna mengkonfirmasi, tampilkan dialog verifikasi PIN
+                      showDialog(
+                        context: context,
+                        barrierDismissible: false,
+                        builder: (BuildContext dialogContext) {
+                          return VerifyPin(
+                            onPinVerified: () {
+                              // Jika PIN diverifikasi, panggil fungsi penghapusan distributor
+                              _deleteDistributor(widget.id);
+                            },
+                          );
+                        },
                       );
                     },
                   );
@@ -210,7 +221,7 @@ class _DistributorDetailsState extends State<DistributorDetails> {
                 child: const Text('Hapus'),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.yellow,
-                  foregroundColor: Colors.black
+                  foregroundColor: Colors.black,
                 ),
               ),
             ],

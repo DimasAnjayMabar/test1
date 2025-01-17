@@ -8,7 +8,7 @@ import 'package:test1/menus/piutang_menu.dart';
 import 'package:test1/menus/transaksi_menu.dart';
 import 'package:test1/menus/settings_page.dart';
 import 'package:test1/popups/exit/logout_app.dart';
-import 'package:test1/popups/verify/verify_admin.dart';
+import 'package:test1/popups/verify/settings/verify_admin.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});

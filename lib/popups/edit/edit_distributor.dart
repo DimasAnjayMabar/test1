@@ -7,6 +7,7 @@ import 'package:test1/beans/storage/temp_id_storage.dart';
 import 'package:test1/beans/storage/temp_pin_storage.dart';
 import 'package:test1/menus/settings_page.dart';
 import 'package:flutter/services.dart';
+import 'package:test1/popups/verify/distributor/verify_distributor_change.dart';
 
 class EditDistributor extends StatefulWidget {
   const EditDistributor({super.key});
@@ -304,11 +305,20 @@ class _EditDistributorState extends State<EditDistributor> {
                       foregroundColor: Colors.black),
                 ),
                 ElevatedButton(
-                  onPressed: _EditDistributorForm,
+                  onPressed: () {
+                    VerifyDistributorChange.showExitPopup(
+                      context,
+                      () {
+                        // Panggil fungsi _EditPinForm
+                        _EditDistributorForm();
+                      },
+                    );
+                  },
                   child: const Text('Simpan'),
                   style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.yellow,
-                      foregroundColor: Colors.black),
+                    backgroundColor: Colors.yellow,
+                    foregroundColor: Colors.black,
+                  ),
                 ),
               ],
             ),
